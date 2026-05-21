@@ -1,0 +1,131 @@
+/* eslint-disable react/display-name -- inline render wrappers don't need display names */
+import React from 'react';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+import { createPopper } from '@popperjs/core';
+import { useMenu } from '../src/hooks/useMenu';
+import { useMediaQuery } from '../src/hooks/useMediaQuery';
+import { usePopper } from '../src/hooks/usePopper';
+import { MenuContext } from '../src/components/Menu';
+import { SidebarContext } from '../src/components/Sidebar';
+
+// vitest hoists vi.mock above the imports above.
+vi.mock('@popperjs/core', () => ({
+  createPopper: vi.fn(() => ({ update: vi.fn(), destroy: vi.fn() })),
+}));
+
+describe('useMenu', () => {
+  it('throws when used outside a Menu', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    expect(() => renderHook(() => useMenu())).toThrow('Menu Component is required!');
+    spy.mockRestore();
+  });
+
+  it('returns the menu context value', () => {
+    const value = { transitionDuration: 400, closeOnClick: true };
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <MenuContext.Provider value={value}>{children}</MenuContext.Provider>
+    );
+    const { result } = renderHook(() => useMenu(), { wrapper });
+    expect(result.current).toEqual(value);
+  });
+});
+
+describe('useMediaQuery', () => {
+  const mockMatchMedia = (matches: boolean) => {
+    const listeners = new Set<() => void>();
+    const mql = {
+      matches,
+      media: '',
+      addEventListener: (_: string, cb: () => void) => listeners.add(cb),
+      removeEventListener: (_: string, cb: () => void) => listeners.delete(cb),
+      dispatchChange(next: boolean) {
+        mql.matches = next;
+        listeners.forEach((cb) => cb());
+      },
+    };
+    window.matchMedia = vi
+      .fn()
+      .mockImplementation(() => mql) as unknown as typeof window.matchMedia;
+    return mql;
+  };
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('returns false when no breakpoint is provided', () => {
+    const { result } = renderHook(() => useMediaQuery());
+    expect(result.current).toBe(false);
+  });
+
+  it('does not query matchMedia when no breakpoint is set', () => {
+    const spy = vi.fn();
+    window.matchMedia = spy as unknown as typeof window.matchMedia;
+    renderHook(() => useMediaQuery());
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('returns true when the media query matches', () => {
+    mockMatchMedia(true);
+    const { result } = renderHook(() => useMediaQuery('(max-width: 600px)'));
+    expect(result.current).toBe(true);
+  });
+
+  it('updates when the media query changes', () => {
+    const mql = mockMatchMedia(false);
+    const { result } = renderHook(() => useMediaQuery('(max-width: 600px)'));
+    expect(result.current).toBe(false);
+
+    act(() => mql.dispatchChange(true));
+    expect(result.current).toBe(true);
+  });
+});
+
+describe('usePopper', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const makeRefs = () => ({
+    buttonRef: { current: document.createElement('a') } as React.RefObject<HTMLAnchorElement>,
+    contentRef: { current: document.createElement('div') } as React.RefObject<HTMLDivElement>,
+  });
+
+  const wrapperWith =
+    (collapsed: boolean) =>
+    ({ children }: { children: React.ReactNode }) =>
+      (
+        <SidebarContext.Provider value={{ collapsed, transitionDuration: 300 }}>
+          {children}
+        </SidebarContext.Provider>
+      );
+
+  it('does not create a popper for non-top-level submenus', () => {
+    const { buttonRef, contentRef } = makeRefs();
+    renderHook(() => usePopper({ level: 1, buttonRef, contentRef }), {
+      wrapper: wrapperWith(true),
+    });
+    expect(createPopper).not.toHaveBeenCalled();
+  });
+
+  it('does not create a popper when the sidebar is expanded', () => {
+    const { buttonRef, contentRef } = makeRefs();
+    renderHook(() => usePopper({ level: 0, buttonRef, contentRef }), {
+      wrapper: wrapperWith(false),
+    });
+    expect(createPopper).not.toHaveBeenCalled();
+  });
+
+  it('creates a popper for a collapsed top-level submenu', () => {
+    const { buttonRef, contentRef } = makeRefs();
+    renderHook(() => usePopper({ level: 0, buttonRef, contentRef }), {
+      wrapper: wrapperWith(true),
+    });
+    expect(createPopper).toHaveBeenCalledWith(
+      buttonRef.current,
+      contentRef.current,
+      expect.objectContaining({ placement: 'right', strategy: 'fixed' }),
+    );
+  });
+});
