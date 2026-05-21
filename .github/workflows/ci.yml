@@ -51,6 +51,23 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn test:ci
 
+  test-react:
+    name: Test (React ${{ matrix.react }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        react: [18, 19]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - run: yarn add -D --ignore-scripts react@${{ matrix.react }} react-dom@${{ matrix.react }}
+      - run: yarn test:ci
+
   build:
     name: Build
     runs-on: ubuntu-latest

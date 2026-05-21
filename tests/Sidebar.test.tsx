@@ -32,8 +32,8 @@ describe('Sidebar', () => {
     });
   });
 
-  it('should set the width to 80px when defaultCollapsed is true ', () => {
-    customRender(<Sidebar defaultCollapsed>Sidebar</Sidebar>);
+  it('should set the width to 80px when collapsed is true ', () => {
+    customRender(<Sidebar collapsed>Sidebar</Sidebar>);
     const sidebarElem = screen.getByTestId(`${sidebarClasses.root}-test-id`);
     expect(sidebarElem).toHaveClass(sidebarClasses.collapsed);
     expect(sidebarElem).toHaveStyle({
@@ -44,7 +44,7 @@ describe('Sidebar', () => {
 
   it('should have a width of 100px when collapsedWidth is set ', () => {
     customRender(
-      <Sidebar collapsedWidth="100px" defaultCollapsed>
+      <Sidebar collapsedWidth="100px" collapsed>
         Sidebar
       </Sidebar>,
     );
@@ -102,7 +102,7 @@ describe('Sidebar', () => {
     vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
 
     customRender(
-      <Sidebar breakPoint="all" defaultCollapsed>
+      <Sidebar breakPoint="all" collapsed>
         Sidebar
       </Sidebar>,
     );

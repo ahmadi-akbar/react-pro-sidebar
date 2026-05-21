@@ -106,7 +106,7 @@ export const Toggled: StoryFn<typeof Sidebar> = () => {
 
   return (
     <div style={{ display: 'flex', height: '100%', minHeight: '400px' }}>
-      <Sidebar onBackdropClick={() => setToggled(false)} toggled={toggled} breakPoint="always">
+      <Sidebar onBackdropClick={() => setToggled(false)} toggled={toggled} breakPoint="all">
         <Menu>
           <MenuItem> Documentation</MenuItem>
           <MenuItem> Calendar</MenuItem>
@@ -159,7 +159,7 @@ export const BreakPoint: StoryFn<typeof Sidebar> = () => {
 
   return (
     <div style={{ display: 'flex', height: '100%', minHeight: '400px' }}>
-      <Sidebar onBackdropClick={() => setToggled(false)} toggled={toggled} breakPoint="always">
+      <Sidebar onBackdropClick={() => setToggled(false)} toggled={toggled} breakPoint="all">
         <Menu>
           <MenuItem> Documentation</MenuItem>
           <MenuItem> Calendar</MenuItem>

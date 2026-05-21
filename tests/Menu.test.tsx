@@ -9,7 +9,7 @@ import { menuClasses, sidebarClasses } from '../src/utils/utilityClasses';
 describe('Menu', () => {
   it('should display popper on submenu click when collapsed', async () => {
     customRender(
-      <Sidebar defaultCollapsed>
+      <Sidebar collapsed>
         <Menu>
           <SubMenu label="Charts"></SubMenu>
         </Menu>

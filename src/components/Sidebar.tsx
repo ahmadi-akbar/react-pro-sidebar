@@ -1,12 +1,11 @@
 import React from 'react';
 import styled, { CSSObject } from '@emotion/styled';
 import classnames from 'classnames';
-import { useLegacySidebar } from '../hooks/useLegacySidebar';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { sidebarClasses } from '../utils/utilityClasses';
 import { StyledBackdrop } from '../styles/StyledBackdrop';
 
-type BreakPoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'always' | 'all';
+type BreakPoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'all';
 
 const BREAK_POINTS = {
   xs: '480px',
@@ -15,7 +14,6 @@ const BREAK_POINTS = {
   lg: '992px',
   xl: '1200px',
   xxl: '1600px',
-  always: 'always',
   all: 'all',
 };
 
@@ -36,14 +34,6 @@ export interface SidebarProps extends React.HTMLAttributes<HTMLHtmlElement> {
    * @default ```80px```
    */
   collapsedWidth?: string;
-
-  /**
-   * initial collapsed status
-   * @default ```false```
-   *
-   * @deprecated use ```collapsed``` instead
-   */
-  defaultCollapsed?: boolean;
 
   /**
    * set when the sidebar should trigger responsiveness behavior
@@ -212,7 +202,6 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
       onBreakPoint,
       width = '250px',
       collapsedWidth = '80px',
-      defaultCollapsed,
       className,
       children,
       breakPoint,
@@ -236,13 +225,7 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
           return `(max-width: ${BREAK_POINTS[breakPoint]})`;
         }
 
-        if (breakPoint === 'always' || breakPoint === 'all') {
-          if (breakPoint === 'always') {
-            console.warn(
-              'The "always" breakPoint is deprecated and will be removed in future release. ' +
-                'Please use the "all" breakPoint instead.',
-            );
-          }
+        if (breakPoint === 'all') {
           return `screen`;
         }
 
@@ -258,41 +241,16 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
 
     const broken = useMediaQuery(getBreakpointValue());
 
-    const [mounted, setMounted] = React.useState(false);
-
-    const legacySidebarContext = useLegacySidebar();
-
-    const collapsedValue =
-      collapsed ?? (!mounted && defaultCollapsed ? true : legacySidebarContext?.collapsed);
-    const toggledValue = toggled ?? legacySidebarContext?.toggled;
+    const collapsedValue = collapsed;
+    const toggledValue = toggled;
 
     const handleBackdropClick = () => {
       onBackdropClick?.();
-      legacySidebarContext?.updateSidebarState({ toggled: false });
     };
 
     React.useEffect(() => {
       breakpointCallbackFnRef.current?.(broken);
     }, [broken]);
-
-    // TODO: remove in next major version
-    React.useEffect(() => {
-      legacySidebarContext?.updateSidebarState({ broken, rtl, transitionDuration });
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [broken, legacySidebarContext?.updateSidebarState, rtl, transitionDuration]);
-
-    // TODO: remove in next major version
-    React.useEffect(() => {
-      if (!mounted) {
-        legacySidebarContext?.updateSidebarState({
-          collapsed: defaultCollapsed,
-        });
-        setMounted(true);
-      }
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [defaultCollapsed, mounted, legacySidebarContext?.updateSidebarState]);
 
     return (
       <SidebarContext.Provider
