@@ -1,4 +1,5 @@
 import React from 'react';
+import { describe, it, expect } from 'vitest';
 import { customRender, fireEvent, screen, waitFor } from './testUtils';
 import { Sidebar } from '../src/components/Sidebar';
 import { Menu } from '../src/components/Menu';

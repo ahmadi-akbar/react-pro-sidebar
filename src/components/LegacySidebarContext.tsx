@@ -36,11 +36,11 @@ export const SidebarProvider: React.FC<SidebarProviderProps> = ({ children }) =>
   }, []);
 
   const updateCollapseState = React.useCallback(() => {
-    setSidebarState((prevState) => ({ ...prevState, collapsed: !Boolean(prevState?.collapsed) }));
+    setSidebarState((prevState) => ({ ...prevState, collapsed: !prevState?.collapsed }));
   }, []);
 
   const updateToggleState = React.useCallback(() => {
-    setSidebarState((prevState) => ({ ...prevState, toggled: !Boolean(prevState?.toggled) }));
+    setSidebarState((prevState) => ({ ...prevState, toggled: !prevState?.toggled }));
   }, []);
 
   const providerValue = React.useMemo(

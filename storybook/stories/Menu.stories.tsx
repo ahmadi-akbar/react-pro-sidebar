@@ -1,9 +1,9 @@
 import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { Menu, menuClasses, MenuItem, Sidebar, SubMenu } from '../../src';
 import { Icon } from '../icons/Icon';
 
-const StoryParams: ComponentMeta<typeof Menu> = {
+const StoryParams: Meta<typeof Menu> = {
   title: 'Menu',
   component: Menu,
   argTypes: {},
@@ -11,7 +11,7 @@ const StoryParams: ComponentMeta<typeof Menu> = {
 
 export default StoryParams;
 
-export const Basic: ComponentStory<typeof Menu> = ({ ...props }) => (
+export const Basic: StoryFn<typeof Menu> = ({ ...props }) => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu {...props}>
@@ -46,7 +46,7 @@ Basic.parameters = {
   },
 };
 
-export const renderExpandIcon: ComponentStory<typeof Menu> = () => (
+export const renderExpandIcon: StoryFn<typeof Menu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu renderExpandIcon={({ open }) => <span>{open ? '-' : '+'}</span>}>
@@ -65,7 +65,7 @@ export const renderExpandIcon: ComponentStory<typeof Menu> = () => (
 
 renderExpandIcon.storyName = 'renderExpandIcon';
 
-export const MenuItemStyles: ComponentStory<typeof Menu> = () => (
+export const MenuItemStyles: StoryFn<typeof Menu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu
@@ -99,7 +99,7 @@ export const MenuItemStyles: ComponentStory<typeof Menu> = () => (
 
 MenuItemStyles.storyName = 'menuItemStyles';
 
-export const TransitionDuration: ComponentStory<typeof Menu> = () => (
+export const TransitionDuration: StoryFn<typeof Menu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu transitionDuration={1000}>
@@ -118,7 +118,7 @@ export const TransitionDuration: ComponentStory<typeof Menu> = () => (
 
 TransitionDuration.storyName = 'transitionDuration';
 
-export const CloseOnClick: ComponentStory<typeof Menu> = () => (
+export const CloseOnClick: StoryFn<typeof Menu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar collapsed>
       <Menu closeOnClick>
@@ -137,7 +137,7 @@ export const CloseOnClick: ComponentStory<typeof Menu> = () => (
 
 CloseOnClick.storyName = 'closeOnClick';
 
-export const RootStyles: ComponentStory<typeof Menu> = () => (
+export const RootStyles: StoryFn<typeof Menu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu

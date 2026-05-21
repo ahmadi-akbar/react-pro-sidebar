@@ -1,9 +1,9 @@
 import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { Menu, menuClasses, MenuItem, Sidebar, SubMenu } from '../../src';
 import { Icon } from '../icons/Icon';
 
-const StoryParams: ComponentMeta<typeof SubMenu> = {
+const StoryParams: Meta<typeof SubMenu> = {
   title: 'SubMenu',
   component: SubMenu,
   argTypes: {},
@@ -11,7 +11,7 @@ const StoryParams: ComponentMeta<typeof SubMenu> = {
 
 export default StoryParams;
 
-export const Basic: ComponentStory<typeof SubMenu> = ({ ...props }) => (
+export const Basic: StoryFn<typeof SubMenu> = ({ ...props }) => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -64,7 +64,7 @@ Basic.parameters = {
   },
 };
 
-export const WithIcon: ComponentStory<typeof SubMenu> = () => (
+export const WithIcon: StoryFn<typeof SubMenu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -90,7 +90,7 @@ export const WithIcon: ComponentStory<typeof SubMenu> = () => (
 
 WithIcon.storyName = 'icon';
 
-export const Prefix: ComponentStory<typeof SubMenu> = () => (
+export const Prefix: StoryFn<typeof SubMenu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -115,7 +115,7 @@ export const Prefix: ComponentStory<typeof SubMenu> = () => (
 );
 Prefix.storyName = 'prefix';
 
-export const Suffix: ComponentStory<typeof SubMenu> = () => (
+export const Suffix: StoryFn<typeof SubMenu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -140,7 +140,7 @@ export const Suffix: ComponentStory<typeof SubMenu> = () => (
 );
 Suffix.storyName = 'suffix';
 
-export const Active: ComponentStory<typeof SubMenu> = () => (
+export const Active: StoryFn<typeof SubMenu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -165,7 +165,7 @@ export const Active: ComponentStory<typeof SubMenu> = () => (
 );
 Active.storyName = 'active';
 
-export const Disabled: ComponentStory<typeof SubMenu> = () => (
+export const Disabled: StoryFn<typeof SubMenu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -190,7 +190,7 @@ export const Disabled: ComponentStory<typeof SubMenu> = () => (
 );
 Disabled.storyName = 'disabled';
 
-export const Component: ComponentStory<typeof MenuItem> = () => (
+export const Component: StoryFn<typeof MenuItem> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -205,7 +205,7 @@ export const Component: ComponentStory<typeof MenuItem> = () => (
 );
 Component.storyName = 'component';
 
-export const DefaultOpen: ComponentStory<typeof SubMenu> = () => (
+export const DefaultOpen: StoryFn<typeof SubMenu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -230,7 +230,7 @@ export const DefaultOpen: ComponentStory<typeof SubMenu> = () => (
 );
 DefaultOpen.storyName = 'defaultOpen';
 
-export const Open: ComponentStory<typeof SubMenu> = () => {
+export const Open: StoryFn<typeof SubMenu> = () => {
   const [open, setOpen] = React.useState<'charts' | 'maps' | 'theme' | undefined>();
 
   const handleOpenSubMenu = (key: 'charts' | 'maps' | 'theme') => {
@@ -275,7 +275,7 @@ export const Open: ComponentStory<typeof SubMenu> = () => {
 };
 Open.storyName = 'open';
 
-export const RootStyles: ComponentStory<typeof MenuItem> = () => (
+export const RootStyles: StoryFn<typeof MenuItem> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>

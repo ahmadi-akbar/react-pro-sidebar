@@ -1,18 +1,29 @@
 {
   "compilerOptions": {
     "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "declarationDir": "dist",
     "module": "esnext",
-    "target": "es5",
+    "target": "es2020",
     "lib": ["dom", "esnext"],
     "sourceMap": true,
     "jsx": "react",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "isolatedModules": true
   },
-  "include": ["src", "tests", "storybook", "setupTests.ts"],
+  "include": [
+    "src",
+    "tests",
+    "storybook",
+    ".storybook/**/*.ts",
+    "setupTests.ts",
+    "vitest.config.ts",
+    "tsup.config.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

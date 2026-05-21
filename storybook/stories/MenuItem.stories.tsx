@@ -1,9 +1,9 @@
 import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { Menu, menuClasses, MenuItem, Sidebar } from '../../src';
 import { Icon } from '../icons/Icon';
 
-const StoryParams: ComponentMeta<typeof MenuItem> = {
+const StoryParams: Meta<typeof MenuItem> = {
   title: 'MenuItem',
   component: MenuItem,
   argTypes: {},
@@ -11,7 +11,7 @@ const StoryParams: ComponentMeta<typeof MenuItem> = {
 
 export default StoryParams;
 
-export const Basic: ComponentStory<typeof MenuItem> = ({ ...props }) => (
+export const Basic: StoryFn<typeof MenuItem> = ({ ...props }) => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -46,7 +46,7 @@ Basic.parameters = {
   },
 };
 
-export const WithIcon: ComponentStory<typeof MenuItem> = () => (
+export const WithIcon: StoryFn<typeof MenuItem> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -60,7 +60,7 @@ export const WithIcon: ComponentStory<typeof MenuItem> = () => (
 );
 WithIcon.storyName = 'icon';
 
-export const Prefix: ComponentStory<typeof MenuItem> = () => (
+export const Prefix: StoryFn<typeof MenuItem> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -74,7 +74,7 @@ export const Prefix: ComponentStory<typeof MenuItem> = () => (
 );
 Prefix.storyName = 'prefix';
 
-export const Suffix: ComponentStory<typeof MenuItem> = () => (
+export const Suffix: StoryFn<typeof MenuItem> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -88,7 +88,7 @@ export const Suffix: ComponentStory<typeof MenuItem> = () => (
 );
 Suffix.storyName = 'suffix';
 
-export const Active: ComponentStory<typeof MenuItem> = () => (
+export const Active: StoryFn<typeof MenuItem> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -102,7 +102,7 @@ export const Active: ComponentStory<typeof MenuItem> = () => (
 );
 Active.storyName = 'active';
 
-export const Disabled: ComponentStory<typeof MenuItem> = () => (
+export const Disabled: StoryFn<typeof MenuItem> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -116,7 +116,7 @@ export const Disabled: ComponentStory<typeof MenuItem> = () => (
 );
 Disabled.storyName = 'disabled';
 
-export const Component: ComponentStory<typeof MenuItem> = () => (
+export const Component: StoryFn<typeof MenuItem> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -129,7 +129,7 @@ export const Component: ComponentStory<typeof MenuItem> = () => (
 );
 Component.storyName = 'component';
 
-export const RootStyles: ComponentStory<typeof MenuItem> = () => (
+export const RootStyles: StoryFn<typeof MenuItem> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>

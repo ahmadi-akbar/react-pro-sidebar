@@ -351,3 +351,5 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
     );
   },
 );
+
+Sidebar.displayName = 'Sidebar';

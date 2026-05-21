@@ -50,7 +50,7 @@ const StyledCollapsedSidebarFooter = styled.a`
 const codeUrl =
   'https://github.com/azouaoui-med/react-pro-sidebar/blob/master/storybook/Playground.tsx';
 
-export const SidebarFooter: React.FC<SidebarFooterProps> = ({ children, collapsed, ...rest }) => {
+export const SidebarFooter: React.FC<SidebarFooterProps> = ({ collapsed, ...rest }) => {
   return (
     <div
       style={{

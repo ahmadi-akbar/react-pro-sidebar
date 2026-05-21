@@ -1,4 +1,5 @@
 import React from 'react';
+import { describe, it, expect, vi } from 'vitest';
 import { customRender, screen } from './testUtils';
 import { Sidebar } from '../src/components/Sidebar';
 import * as mediaQueryHook from '../src/hooks/useMediaQuery';
@@ -60,7 +61,7 @@ describe('Sidebar', () => {
     const innerSidebarElem = screen.getByTestId(`${sidebarClasses.container}-test-id`);
 
     expect(innerSidebarElem).toHaveStyle({
-      'background-color': 'black',
+      'background-color': 'rgb(0, 0, 0)',
     });
   });
 
@@ -83,7 +84,7 @@ describe('Sidebar', () => {
   });
 
   it('should sidebar have a correct positioning when broken', () => {
-    jest.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
+    vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
 
     customRender(<Sidebar breakPoint="all">Sidebar</Sidebar>);
 
@@ -98,7 +99,7 @@ describe('Sidebar', () => {
   });
 
   it('should sidebar have a correct positioning when broken and collapsed', () => {
-    jest.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
+    vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
 
     customRender(
       <Sidebar breakPoint="all" defaultCollapsed>
@@ -114,7 +115,7 @@ describe('Sidebar', () => {
   });
 
   it('should display overlay position sidebar to the left when broken and toggled', () => {
-    jest.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
+    vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
 
     customRender(
       <Sidebar breakPoint="all" toggled>
@@ -131,7 +132,7 @@ describe('Sidebar', () => {
   });
 
   it('should position and hide sidebar to the right when rtl is true and broken', () => {
-    jest.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
+    vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
 
     customRender(
       <Sidebar rtl breakPoint="all">
@@ -146,7 +147,7 @@ describe('Sidebar', () => {
   });
 
   it('should display and position sidebar to the right when rtl is true and broken and toggled', () => {
-    jest.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
+    vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
 
     customRender(
       <Sidebar rtl breakPoint="all" toggled>
