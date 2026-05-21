@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { customRender, screen } from './testUtils';
+import { customRender, screen, fireEvent } from './testUtils';
 import { Sidebar } from '../src/components/Sidebar';
 import * as mediaQueryHook from '../src/hooks/useMediaQuery';
 import { sidebarClasses } from '../src/utils/utilityClasses';
@@ -158,6 +158,60 @@ describe('Sidebar', () => {
 
     expect(SidebarElem).toHaveStyle({
       right: '0px',
+    });
+  });
+
+  describe('backdrop', () => {
+    const renderBroken = () => {
+      vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
+      const onBackdropClick = vi.fn();
+      customRender(
+        <Sidebar breakPoint="all" toggled onBackdropClick={onBackdropClick}>
+          Sidebar
+        </Sidebar>,
+      );
+      const backdrop = screen.getByTestId(`${sidebarClasses.backdrop}-test-id`);
+      return { backdrop, onBackdropClick };
+    };
+
+    it('should call onBackdropClick when clicked', () => {
+      const { backdrop, onBackdropClick } = renderBroken();
+      fireEvent.click(backdrop);
+      expect(onBackdropClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call onBackdropClick on Enter and Space keys', () => {
+      const { backdrop, onBackdropClick } = renderBroken();
+      fireEvent.keyDown(backdrop, { key: 'Enter' });
+      fireEvent.keyDown(backdrop, { key: ' ' });
+      expect(onBackdropClick).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not call onBackdropClick on other keys', () => {
+      const { backdrop, onBackdropClick } = renderBroken();
+      fireEvent.keyDown(backdrop, { key: 'a' });
+      fireEvent.keyDown(backdrop, { key: 'Tab' });
+      expect(onBackdropClick).not.toHaveBeenCalled();
+    });
+
+    it('should call onBackdropClick when Escape is pressed', () => {
+      const { onBackdropClick } = renderBroken();
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(onBackdropClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('should move focus to the sidebar when opened as an overlay', () => {
+      const { onBackdropClick } = renderBroken();
+      expect(onBackdropClick).not.toHaveBeenCalled();
+      expect(screen.getByTestId(`${sidebarClasses.root}-test-id`)).toHaveFocus();
+    });
+
+    it('should not close on Escape when not an overlay', () => {
+      const onBackdropClick = vi.fn();
+      vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => false);
+      customRender(<Sidebar onBackdropClick={onBackdropClick}>Sidebar</Sidebar>);
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(onBackdropClick).not.toHaveBeenCalled();
     });
   });
 });

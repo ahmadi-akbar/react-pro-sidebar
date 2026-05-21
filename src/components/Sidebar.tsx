@@ -248,17 +248,63 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
       onBackdropClick?.();
     };
 
+    const handleBackdropKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        onBackdropClick?.();
+      }
+    };
+
+    const innerRef = React.useRef<HTMLHtmlElement | null>(null);
+
+    const setSidebarRef = React.useCallback(
+      (node: HTMLHtmlElement | null) => {
+        innerRef.current = node;
+        if (typeof ref === 'function') {
+          ref(node);
+        } else if (ref) {
+          (ref as React.MutableRefObject<HTMLHtmlElement | null>).current = node;
+        }
+      },
+      [ref],
+    );
+
+    const isOverlayOpen = !!(broken && toggledValue);
+
     React.useEffect(() => {
       breakpointCallbackFnRef.current?.(broken);
     }, [broken]);
+
+    // When the sidebar opens as an overlay (broken + toggled), move focus to it
+    // so keyboard users land inside the sidebar rather than on the backdrop.
+    React.useEffect(() => {
+      if (isOverlayOpen) {
+        innerRef.current?.focus();
+      }
+    }, [isOverlayOpen]);
+
+    // Close the overlay sidebar on Escape from anywhere.
+    React.useEffect(() => {
+      if (!isOverlayOpen) return undefined;
+
+      const handleEscape = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          onBackdropClick?.();
+        }
+      };
+
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }, [isOverlayOpen, onBackdropClick]);
 
     return (
       <SidebarContext.Provider
         value={{ collapsed: collapsedValue, toggled: toggledValue, rtl, transitionDuration }}
       >
         <StyledSidebar
-          ref={ref}
+          ref={setSidebarRef}
           data-testid={`${sidebarClasses.root}-test-id`}
+          tabIndex={-1}
           rtl={rtl}
           rootStyles={rootStyles}
           width={width}
@@ -300,7 +346,7 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
               tabIndex={0}
               aria-label="backdrop"
               onClick={handleBackdropClick}
-              onKeyPress={handleBackdropClick}
+              onKeyDown={handleBackdropKeyDown}
               className={sidebarClasses.backdrop}
             />
           )}

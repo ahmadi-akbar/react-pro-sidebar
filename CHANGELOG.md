@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - unreleased
+
+> Breaking release. See [MIGRATION.md](./MIGRATION.md) for upgrade steps.
+
+### Removed
+
+- **[Sidebar]** Removed the `ProSidebarProvider` component (deprecated since 1.1)
+- Removed the `useProSidebar` hook (deprecated since 1.1) — use `Sidebar` props instead
+- **[Sidebar]** Removed the `defaultCollapsed` prop — use the controlled `collapsed` prop
+- **[Sidebar]** Removed the `breakPoint="always"` value — use `breakPoint="all"`
+
+### Changed
+
+- **Breaking:** React peer dependency is now `>=18` (dropped React 16 / 17 support); React 19 is supported
+- Runtime dependencies (`@emotion`, `@popperjs`, `classnames`) are now externalized instead of bundled, reducing install size and avoiding duplicate copies
+- The package now ships a proper `exports` map with ESM (`dist/index.mjs`), CJS (`dist/index.js`) and a `types` entry
+
+### Added
+
+- **[Sidebar]** Pressing `Escape` now closes the sidebar when open as an overlay (broken + toggled)
+- **[Sidebar]** Focus moves into the sidebar when it opens as an overlay
+
+### Fixed
+
+- **[Sidebar]** Backdrop now uses `onKeyDown` and activates only on `Enter` / `Space` (replacing the deprecated `onKeyPress`, which fired on any key)
+
 ## [1.1.0] - 2024-02-03
 
 ## Fixed
