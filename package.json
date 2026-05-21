@@ -53,6 +53,7 @@
     "@types/react-dom": "^18.0.9",
     "@vitejs/plugin-react": "^4",
     "@vitest/coverage-v8": "^4",
+    "axe-core": "^4.11.4",
     "eslint": "^9",
     "eslint-config-prettier": "^9",
     "eslint-plugin-jest-dom": "^5",
@@ -73,7 +74,8 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8",
     "vite": "^6",
-    "vitest": "^4"
+    "vitest": "^4",
+    "vitest-axe": "^0.1.0"
   },
   "keywords": [
     "react-component",

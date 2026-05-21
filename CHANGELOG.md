@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **[Sidebar]** Backdrop now uses `onKeyDown` and activates only on `Enter` / `Space` (replacing the deprecated `onKeyPress`, which fired on any key)
 - **[SubMenu]** Items in a closed submenu are no longer reachable via Tab or exposed to screen readers — the closed submenu content is now marked `inert`
+- **[SubMenu]** Trigger now has `role="button"`, so its `aria-expanded` / `aria-haspopup` state is valid (it previously sat on a roleless `<a>`)
 
 ## [1.1.0] - 2024-02-03
 
