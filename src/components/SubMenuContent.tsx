@@ -60,6 +60,13 @@ const SubMenuContentFR: React.ForwardRefRenderFunction<HTMLDivElement, SubMenuCo
   const { transitionDuration } = useMenu();
   const [defaultOpenState] = React.useState(defaultOpen);
 
+  // A collapsed top-level submenu opens as a popper (driven by `openWhenCollapsed`);
+  // otherwise it slides open based on `open`. While hidden, mark the subtree `inert`
+  // so its links stay out of the tab order and the accessibility tree.
+  const isVisible = firstLevel && collapsed ? !!openWhenCollapsed : !!open;
+  // `inert` typing differs between React 18 and 19 type packages, so apply it untyped.
+  const inertProps = (isVisible ? {} : { inert: '' }) as object;
+
   return (
     <StyledSubMenuContent
       data-testid={`${menuClasses.subMenuContent}-test-id`}
@@ -70,6 +77,7 @@ const SubMenuContentFR: React.ForwardRefRenderFunction<HTMLDivElement, SubMenuCo
       openWhenCollapsed={openWhenCollapsed}
       transitionDuration={transitionDuration}
       defaultOpen={defaultOpenState}
+      {...inertProps}
       {...rest}
     >
       <StyledUl>{children}</StyledUl>

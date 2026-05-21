@@ -26,10 +26,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **[Sidebar]** Pressing `Escape` now closes the sidebar when open as an overlay (broken + toggled)
 - **[Sidebar]** Focus moves into the sidebar when it opens as an overlay
+- **[MenuItem]** `aria-current="page"` on active items and `aria-disabled` on disabled items
+- **[SubMenu]** `aria-expanded` on the trigger, `aria-haspopup="menu"` when a collapsed top-level submenu opens as a popup, and `aria-disabled` on disabled triggers
 
 ### Fixed
 
 - **[Sidebar]** Backdrop now uses `onKeyDown` and activates only on `Enter` / `Space` (replacing the deprecated `onKeyPress`, which fired on any key)
+- **[SubMenu]** Items in a closed submenu are no longer reachable via Tab or exposed to screen readers — the closed submenu content is now marked `inert`
 
 ## [1.1.0] - 2024-02-03
 

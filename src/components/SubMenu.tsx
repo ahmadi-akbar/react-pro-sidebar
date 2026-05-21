@@ -362,6 +362,9 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
         onKeyUp={handleOnKeyUp}
         component={component}
         tabIndex={0}
+        aria-expanded={openControlled ?? open}
+        aria-haspopup={collapsed && level === 0 ? 'menu' : undefined}
+        aria-disabled={disabled || undefined}
         {...rest}
       >
         {icon && (

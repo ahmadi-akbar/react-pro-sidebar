@@ -164,6 +164,8 @@ export const MenuItemFR: React.ForwardRefRenderFunction<HTMLLIElement, MenuItemP
         data-testid={`${menuClasses.button}-test-id`}
         component={component}
         tabIndex={0}
+        aria-current={active ? 'page' : undefined}
+        aria-disabled={disabled || undefined}
         {...rest}
       >
         {icon && (
