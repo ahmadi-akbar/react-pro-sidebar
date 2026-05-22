@@ -25,6 +25,19 @@ export interface MenuItemStyles {
   SubMenuExpandIcon?: ElementStyles;
 }
 
+/**
+ * Resolve the styles for a single element of `menuItemStyles`. The value is
+ * either a style object or a function of the item's state.
+ */
+export const resolveElementStyles = (
+  styles: MenuItemStyles | undefined,
+  element: keyof MenuItemStyles,
+  params: MenuItemStylesParams,
+): CSSObject | undefined => {
+  const style = styles?.[element];
+  return typeof style === 'function' ? style(params) : style;
+};
+
 export interface RenderExpandIconParams {
   level: number;
   disabled: boolean;

@@ -8,7 +8,7 @@ import { useMenu } from '../hooks/useMenu';
 import { StyledMenuSuffix } from '../styles/StyledMenuSuffix';
 import { menuClasses } from '../utils/utilityClasses';
 import { MenuButton, menuButtonStyles } from './MenuButton';
-import { LevelContext } from './Menu';
+import { LevelContext, resolveElementStyles } from './Menu';
 import { SidebarContext } from './Sidebar';
 
 export interface MenuItemProps
@@ -104,42 +104,10 @@ export const MenuItemFR: React.ForwardRefRenderFunction<HTMLLIElement, MenuItemP
   const { collapsed, rtl, transitionDuration } = React.useContext(SidebarContext);
   const { menuItemStyles } = useMenu();
 
-  const getMenuItemStyles = (element: MenuItemElement): CSSObject | undefined => {
-    if (menuItemStyles) {
-      const params = { level, disabled, active, isSubmenu: false };
-      const {
-        root: rootElStyles,
-        button: buttonElStyles,
-        label: labelElStyles,
-        icon: iconElStyles,
-        prefix: prefixElStyles,
-        suffix: suffixElStyles,
-      } = menuItemStyles;
+  const styleParams = { level, disabled, active, isSubmenu: false };
 
-      switch (element) {
-        case 'root':
-          return typeof rootElStyles === 'function' ? rootElStyles(params) : rootElStyles;
-
-        case 'button':
-          return typeof buttonElStyles === 'function' ? buttonElStyles(params) : buttonElStyles;
-
-        case 'label':
-          return typeof labelElStyles === 'function' ? labelElStyles(params) : labelElStyles;
-
-        case 'icon':
-          return typeof iconElStyles === 'function' ? iconElStyles(params) : iconElStyles;
-
-        case 'prefix':
-          return typeof prefixElStyles === 'function' ? prefixElStyles(params) : prefixElStyles;
-
-        case 'suffix':
-          return typeof suffixElStyles === 'function' ? suffixElStyles(params) : suffixElStyles;
-
-        default:
-          return undefined;
-      }
-    }
-  };
+  const getMenuItemStyles = (element: MenuItemElement): CSSObject | undefined =>
+    resolveElementStyles(menuItemStyles, element, styleParams);
 
   const sharedClasses = {
     [menuClasses.active]: active,

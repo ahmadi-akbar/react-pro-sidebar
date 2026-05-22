@@ -17,7 +17,7 @@ import {
 import { usePopper } from '../hooks/usePopper';
 import { MenuButton, menuButtonStyles } from './MenuButton';
 import { SidebarContext } from './Sidebar';
-import { LevelContext } from './Menu';
+import { LevelContext, resolveElementStyles } from './Menu';
 
 export interface SubMenuProps
   extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> {
@@ -229,54 +229,10 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
     }
   };
 
-  const getSubMenuItemStyles = (element: MenuItemElement): CSSObject | undefined => {
-    if (menuItemStyles) {
-      const params = { level, disabled, active, isSubmenu: true, open: openControlled ?? open };
-      const {
-        root: rootElStyles,
-        button: buttonElStyles,
-        label: labelElStyles,
-        icon: iconElStyles,
-        prefix: prefixElStyles,
-        suffix: suffixElStyles,
-        subMenuContent: subMenuContentElStyles,
-        SubMenuExpandIcon: SubMenuExpandIconElStyles,
-      } = menuItemStyles;
+  const styleParams = { level, disabled, active, isSubmenu: true, open: openControlled ?? open };
 
-      switch (element) {
-        case 'root':
-          return typeof rootElStyles === 'function' ? rootElStyles(params) : rootElStyles;
-
-        case 'button':
-          return typeof buttonElStyles === 'function' ? buttonElStyles(params) : buttonElStyles;
-
-        case 'label':
-          return typeof labelElStyles === 'function' ? labelElStyles(params) : labelElStyles;
-
-        case 'icon':
-          return typeof iconElStyles === 'function' ? iconElStyles(params) : iconElStyles;
-
-        case 'prefix':
-          return typeof prefixElStyles === 'function' ? prefixElStyles(params) : prefixElStyles;
-
-        case 'suffix':
-          return typeof suffixElStyles === 'function' ? suffixElStyles(params) : suffixElStyles;
-
-        case 'SubMenuExpandIcon':
-          return typeof SubMenuExpandIconElStyles === 'function'
-            ? SubMenuExpandIconElStyles(params)
-            : SubMenuExpandIconElStyles;
-
-        case 'subMenuContent':
-          return typeof subMenuContentElStyles === 'function'
-            ? subMenuContentElStyles(params)
-            : subMenuContentElStyles;
-
-        default:
-          return undefined;
-      }
-    }
-  };
+  const getSubMenuItemStyles = (element: MenuItemElement): CSSObject | undefined =>
+    resolveElementStyles(menuItemStyles, element, styleParams);
 
   React.useEffect(() => {
     setTimeout(() => popperInstance?.update(), sidebarTransitionDuration);
