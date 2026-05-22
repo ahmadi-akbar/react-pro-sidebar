@@ -105,6 +105,27 @@ describe('SubMenu', () => {
     expect(trigger).toHaveClass(menuClasses.disabled);
   });
 
+  it('does not re-run the open animation when only onOpenChange identity changes', () => {
+    const tree = (onOpenChange: () => void) => (
+      <Sidebar>
+        <Menu>
+          <SubMenu label="Charts" open onOpenChange={onOpenChange}>
+            <MenuItem>Pie</MenuItem>
+          </SubMenu>
+        </Menu>
+      </Sidebar>
+    );
+    const { rerender } = customRender(tree(() => {}));
+
+    // The controlled-open effect calls clearTimeout when it runs; a re-render
+    // that only swaps the onOpenChange closure must not re-trigger it.
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+    rerender(tree(() => {}));
+
+    expect(clearTimeoutSpy).not.toHaveBeenCalled();
+    clearTimeoutSpy.mockRestore();
+  });
+
   it('clears the pending animation timer on unmount', () => {
     const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
     const { unmount } = renderSubMenu();

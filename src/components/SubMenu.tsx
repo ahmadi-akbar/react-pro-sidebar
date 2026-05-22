@@ -210,7 +210,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
       !openControlled ? collapseContent() : expandContent();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collapsed, expandContent, label, level, onOpenChange, openControlled]);
+  }, [collapsed, expandContent, level, openControlled]);
 
   // Clear any pending slide-animation timer when the submenu unmounts.
   React.useEffect(() => {
