@@ -44,6 +44,15 @@ yarn add react-pro-sidebar
 npm install react-pro-sidebar
 ```
 
+> **Requirements:** React **>= 18** (React 19 supported). `react` and
+> `react-dom` are peer dependencies.
+
+## Migrating from v1
+
+v2 removes the legacy hook API (`useProSidebar`, `ProSidebarProvider`), the
+`defaultCollapsed` prop and the `breakPoint="always"` value, and requires
+React 18+. See the [migration guide](./MIGRATION.md) for upgrade steps.
+
 ## Usage
 
 ```jsx
@@ -69,13 +78,13 @@ You can make use of the `component` prop to integrate [React Router](https://rea
 
 ```jsx
 import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 <Sidebar>
   <Menu
     menuItemStyles={{
       button: {
-        // the active class will be added automatically by react router
+        // NavLink adds the active class automatically,
         // so we can use it to style the active menu item
         [`&.active`]: {
           backgroundColor: '#13395e',
@@ -84,9 +93,9 @@ import { Link } from 'react-router-dom';
       },
     }}
   >
-    <MenuItem component={<Link to="/documentation" />}> Documentation</MenuItem>
-    <MenuItem component={<Link to="/calendar" />}> Calendar</MenuItem>
-    <MenuItem component={<Link to="/e-commerce" />}> E-commerce</MenuItem>
+    <MenuItem component={<NavLink to="/documentation" />}> Documentation</MenuItem>
+    <MenuItem component={<NavLink to="/calendar" />}> Calendar</MenuItem>
+    <MenuItem component={<NavLink to="/e-commerce" />}> E-commerce</MenuItem>
   </Menu>
 </Sidebar>;
 ```
@@ -166,12 +175,6 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
     <tbody>
         <tr>
             <td rowspan=13>Sidebar</td>
-            <td >defaultCollapsed</td>
-            <td><code>boolean</code></td>
-            <td>Initial collapsed status</td>
-            <td><code>false</code></td>
-        </tr>
-        <tr>
             <td>collapsed</td>
             <td><code>boolean</code></td>
             <td>Sidebar collapsed state</td>
@@ -187,7 +190,7 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
             <td>width</td>
             <td><code>number | string</code></td>
             <td>Width of the sidebar</td>
-            <td><code>270px</code></td>
+            <td><code>250px</code></td>
         </tr>
         <tr>
             <td>collapsedWidth</td>
@@ -241,6 +244,12 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
             <td>onBackdropClick</td>
             <td><code>() => void</code></td>
             <td>Callback function to be called when backdrop is clicked</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>onBreakPoint</td>
+            <td><code>(broken: boolean) => void</code></td>
+            <td>Callback function to be called when the broken state changes</td>
             <td>-</td>
         </tr>
          <tr>
