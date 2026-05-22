@@ -44,18 +44,25 @@ export const usePopper = (options: PopperOptions): PopperResult => {
    * update popper instance (position) when buttonRef or contentRef changes
    */
   React.useEffect(() => {
+    let resizeObserver: ResizeObserver | undefined;
+
     if (contentRef.current && buttonRef.current) {
-      const ro = new ResizeObserver(() => {
+      resizeObserver = new ResizeObserver(() => {
         popperInstanceRef.current?.update();
       });
 
-      ro.observe(contentRef.current);
-      ro.observe(buttonRef.current);
+      resizeObserver.observe(contentRef.current);
+      resizeObserver.observe(buttonRef.current);
     }
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       popperInstanceRef.current?.update();
     }, transitionDuration);
+
+    return () => {
+      resizeObserver?.disconnect();
+      clearTimeout(timer);
+    };
   }, [transitionDuration, toggled, contentRef, buttonRef]);
 
   return { popperInstance: popperInstanceRef.current };

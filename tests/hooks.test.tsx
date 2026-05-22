@@ -128,4 +128,31 @@ describe('usePopper', () => {
       expect.objectContaining({ placement: 'right', strategy: 'fixed' }),
     );
   });
+
+  it('disconnects the ResizeObserver on unmount', () => {
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    class ResizeObserverMock {
+      observe = observe;
+
+      unobserve = vi.fn();
+
+      disconnect = disconnect;
+    }
+    const original = global.ResizeObserver;
+    global.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
+
+    const { buttonRef, contentRef } = makeRefs();
+    const { unmount } = renderHook(() => usePopper({ level: 0, buttonRef, contentRef }), {
+      wrapper: wrapperWith(true),
+    });
+
+    expect(observe).toHaveBeenCalled();
+    expect(disconnect).not.toHaveBeenCalled();
+
+    unmount();
+    expect(disconnect).toHaveBeenCalledTimes(1);
+
+    global.ResizeObserver = original;
+  });
 });
