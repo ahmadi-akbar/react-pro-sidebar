@@ -6,21 +6,19 @@ export const useMediaQuery = (breakpoint?: string): boolean => {
   );
 
   React.useEffect(() => {
-    if (breakpoint) {
-      const media = window.matchMedia(breakpoint);
+    if (!breakpoint || typeof window === 'undefined') return undefined;
 
-      const handleMatch = () => {
-        if (media.matches !== matches) {
-          setMatches(media.matches);
-        }
-      };
+    const media = window.matchMedia(breakpoint);
 
-      handleMatch();
+    // setMatches with the current value; React bails out if it's unchanged.
+    const handleMatch = () => setMatches(media.matches);
 
-      media.addEventListener('change', handleMatch);
-      return () => media.removeEventListener('change', handleMatch);
-    }
-  }, [matches, breakpoint]);
+    // Sync in case the match changed between render and effect.
+    handleMatch();
+
+    media.addEventListener('change', handleMatch);
+    return () => media.removeEventListener('change', handleMatch);
+  }, [breakpoint]);
 
   return matches;
 };

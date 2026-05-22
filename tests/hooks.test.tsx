@@ -80,6 +80,38 @@ describe('useMediaQuery', () => {
     act(() => mql.dispatchChange(true));
     expect(result.current).toBe(true);
   });
+
+  it('does not re-subscribe the listener when the match state changes', () => {
+    const addEventListener = vi.fn<(type: string, cb: () => void) => void>();
+    const removeEventListener = vi.fn();
+    const listeners = new Set<() => void>();
+    const mql = {
+      matches: false,
+      media: '',
+      addEventListener: (type: string, cb: () => void) => {
+        addEventListener(type, cb);
+        listeners.add(cb);
+      },
+      removeEventListener,
+      dispatchChange(next: boolean) {
+        mql.matches = next;
+        listeners.forEach((cb) => cb());
+      },
+    };
+    window.matchMedia = vi
+      .fn()
+      .mockImplementation(() => mql) as unknown as typeof window.matchMedia;
+
+    const { result } = renderHook(() => useMediaQuery('(max-width: 600px)'));
+    expect(addEventListener).toHaveBeenCalledTimes(1);
+
+    act(() => mql.dispatchChange(true));
+
+    expect(result.current).toBe(true);
+    // the listener was not torn down and re-added on the match change
+    expect(addEventListener).toHaveBeenCalledTimes(1);
+    expect(removeEventListener).not.toHaveBeenCalled();
+  });
 });
 
 describe('usePopper', () => {
