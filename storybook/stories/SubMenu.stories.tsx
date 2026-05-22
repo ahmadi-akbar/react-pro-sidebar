@@ -314,3 +314,65 @@ export const RootStyles: StoryFn<typeof MenuItem> = () => (
   </div>
 );
 RootStyles.storyName = 'rootStyles';
+
+export const Accordion: StoryFn<typeof SubMenu> = () => (
+  <div style={{ display: 'flex', height: '100%' }}>
+    <Sidebar>
+      <Menu>
+        <SubMenu label="Settings" accordion defaultOpen>
+          <SubMenu label="Account">
+            <MenuItem> Profile</MenuItem>
+            <MenuItem> Password</MenuItem>
+          </SubMenu>
+          <SubMenu label="Notifications">
+            <MenuItem> Email</MenuItem>
+            <MenuItem> Push</MenuItem>
+          </SubMenu>
+          <SubMenu label="Privacy">
+            <MenuItem> Data</MenuItem>
+            <MenuItem> Sharing</MenuItem>
+          </SubMenu>
+        </SubMenu>
+        <SubMenu label="Tools" defaultOpen>
+          <SubMenu label="Editor">
+            <MenuItem> Theme</MenuItem>
+          </SubMenu>
+          <SubMenu label="Terminal">
+            <MenuItem> Shell</MenuItem>
+          </SubMenu>
+        </SubMenu>
+      </Menu>
+    </Sidebar>
+  </div>
+);
+
+Accordion.storyName = 'accordion';
+
+Accordion.parameters = {
+  docs: {
+    description: {
+      story:
+        '`accordion` on a `SubMenu` coordinates only its direct children — opening one nested submenu inside `Settings` closes its siblings. The neighboring `Tools` submenu is unaffected: its own nested submenus open independently of each other.',
+    },
+    source: {
+      code: `
+      import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
+
+      () => (
+        <Sidebar>
+          <Menu>
+            <SubMenu label="Settings" accordion defaultOpen>
+              <SubMenu label="Account">…</SubMenu>
+              <SubMenu label="Notifications">…</SubMenu>
+              <SubMenu label="Privacy">…</SubMenu>
+            </SubMenu>
+            <SubMenu label="Tools" defaultOpen>
+              <SubMenu label="Editor">…</SubMenu>
+              <SubMenu label="Terminal">…</SubMenu>
+            </SubMenu>
+          </Menu>
+        </Sidebar>
+      )`,
+    },
+  },
+};

@@ -105,6 +105,143 @@ describe('SubMenu', () => {
     expect(trigger).toHaveClass(menuClasses.disabled);
   });
 
+  describe('accordion', () => {
+    it('opens only one top-level SubMenu at a time when Menu.accordion is set', () => {
+      customRender(
+        <Sidebar>
+          <Menu accordion>
+            <SubMenu label="A">
+              <MenuItem>A1</MenuItem>
+            </SubMenu>
+            <SubMenu label="B">
+              <MenuItem>B1</MenuItem>
+            </SubMenu>
+          </Menu>
+        </Sidebar>,
+      );
+
+      const a = screen.getByRole('button', { name: 'A' });
+      const b = screen.getByRole('button', { name: 'B' });
+
+      fireEvent.click(a);
+      expect(a).toHaveAttribute('aria-expanded', 'true');
+      expect(b).toHaveAttribute('aria-expanded', 'false');
+
+      fireEvent.click(b);
+      expect(a).toHaveAttribute('aria-expanded', 'false');
+      expect(b).toHaveAttribute('aria-expanded', 'true');
+
+      // toggling the open one closes it (no leftover open)
+      fireEvent.click(b);
+      expect(b).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('does not affect submenus at deeper levels (per-level scope)', () => {
+      customRender(
+        <Sidebar>
+          <Menu accordion>
+            <SubMenu label="Top">
+              <SubMenu label="X">
+                <MenuItem>X1</MenuItem>
+              </SubMenu>
+              <SubMenu label="Y">
+                <MenuItem>Y1</MenuItem>
+              </SubMenu>
+            </SubMenu>
+          </Menu>
+        </Sidebar>,
+      );
+
+      const x = screen.getByRole('button', { name: 'X' });
+      const y = screen.getByRole('button', { name: 'Y' });
+
+      fireEvent.click(x);
+      fireEvent.click(y);
+
+      // both nested submenus can be open — Menu's accordion only scopes level 0
+      expect(x).toHaveAttribute('aria-expanded', 'true');
+      expect(y).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('coordinates direct children when SubMenu.accordion is set', () => {
+      customRender(
+        <Sidebar>
+          <Menu>
+            <SubMenu label="Group" accordion>
+              <SubMenu label="X">
+                <MenuItem>X1</MenuItem>
+              </SubMenu>
+              <SubMenu label="Y">
+                <MenuItem>Y1</MenuItem>
+              </SubMenu>
+            </SubMenu>
+          </Menu>
+        </Sidebar>,
+      );
+
+      const x = screen.getByRole('button', { name: 'X' });
+      const y = screen.getByRole('button', { name: 'Y' });
+
+      fireEvent.click(x);
+      expect(x).toHaveAttribute('aria-expanded', 'true');
+      expect(y).toHaveAttribute('aria-expanded', 'false');
+
+      fireEvent.click(y);
+      expect(x).toHaveAttribute('aria-expanded', 'false');
+      expect(y).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('honors defaultOpen and warns when multiple siblings have it', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+      customRender(
+        <Sidebar>
+          <Menu accordion>
+            <SubMenu label="A" defaultOpen>
+              <MenuItem>A1</MenuItem>
+            </SubMenu>
+            <SubMenu label="B" defaultOpen>
+              <MenuItem>B1</MenuItem>
+            </SubMenu>
+          </Menu>
+        </Sidebar>,
+      );
+
+      // Last-rendered defaultOpen wins.
+      expect(screen.getByRole('button', { name: 'A' })).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.getByRole('button', { name: 'B' })).toHaveAttribute('aria-expanded', 'true');
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('Multiple SubMenus have `defaultOpen`'),
+      );
+
+      warn.mockRestore();
+    });
+
+    it('lets a controlled `open` prop override the accordion', () => {
+      customRender(
+        <Sidebar>
+          <Menu accordion>
+            <SubMenu label="A" open>
+              <MenuItem>A1</MenuItem>
+            </SubMenu>
+            <SubMenu label="B">
+              <MenuItem>B1</MenuItem>
+            </SubMenu>
+          </Menu>
+        </Sidebar>,
+      );
+
+      const a = screen.getByRole('button', { name: 'A' });
+      const b = screen.getByRole('button', { name: 'B' });
+
+      // Controlled A stays open; opening B (uncontrolled) does not change A.
+      expect(a).toHaveAttribute('aria-expanded', 'true');
+      fireEvent.click(b);
+      expect(a).toHaveAttribute('aria-expanded', 'true');
+      expect(b).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
+
   describe('collapsed (popper) behavior', () => {
     it('opens the popper on click and closes it on Escape', async () => {
       renderSubMenu({}, {}, { collapsed: true });

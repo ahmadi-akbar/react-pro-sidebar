@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **[Menu]** New `accordion` prop — when set, only one top-level `SubMenu` can be open at a time. Opening another closes the previously open one
+- **[SubMenu]** New `accordion` prop — coordinates only the submenu's direct children (per-level scope, independent of any ancestor accordion)
 - **[Sidebar]** Pressing `Escape` now closes the sidebar when open as an overlay (broken + toggled)
 - **[Sidebar]** Focus moves into the sidebar when it opens as an overlay
 - **[MenuItem]** `aria-current="page"` on active items and `aria-disabled` on disabled items

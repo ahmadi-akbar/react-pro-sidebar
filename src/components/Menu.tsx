@@ -71,9 +71,34 @@ export interface MenuContextProps {
 }
 
 export interface MenuProps extends MenuContextProps, React.MenuHTMLAttributes<HTMLMenuElement> {
+  /**
+   * If `true`, only one top-level `SubMenu` can be open at a time (accordion
+   * behavior). Opening another closes the previously open one.
+   * @default ```false```
+   */
+  accordion?: boolean;
+
   rootStyles?: CSSObject;
   children?: React.ReactNode;
 }
+
+/**
+ * Internal context used to coordinate single-open (accordion) behavior across
+ * sibling `SubMenu`s at a given level. A `null` value means no accordion is
+ * active at this level.
+ */
+export type AccordionContextValue = {
+  activeId: string | null;
+  setActive: (id: string, isOpen: boolean) => void;
+  /**
+   * Synchronously-mutable ref used during mount to detect when more than one
+   * `SubMenu` registers `defaultOpen` in the same accordion group (sibling
+   * effects in the same commit otherwise can't see each other's state updates).
+   */
+  defaultOpenRegisteredRef: React.MutableRefObject<string | null>;
+} | null;
+
+export const AccordionContext = React.createContext<AccordionContextValue>(null);
 
 const StyledMenu = styled.nav<Pick<MenuProps, 'rootStyles'>>`
   &.${menuClasses.root} {
@@ -91,6 +116,7 @@ const MenuFR: React.ForwardRefRenderFunction<HTMLMenuElement, MenuProps> = (
     className,
     transitionDuration = 300,
     closeOnClick = false,
+    accordion = false,
     rootStyles,
     menuItemStyles,
     renderExpandIcon,
@@ -103,17 +129,30 @@ const MenuFR: React.ForwardRefRenderFunction<HTMLMenuElement, MenuProps> = (
     [transitionDuration, closeOnClick, menuItemStyles, renderExpandIcon],
   );
 
+  const [activeId, setActiveId] = React.useState<string | null>(null);
+  const setActive = React.useCallback((id: string, isOpen: boolean) => {
+    setActiveId((prev) => (isOpen ? id : prev === id ? null : prev));
+  }, []);
+  const defaultOpenRegisteredRef = React.useRef<string | null>(null);
+
+  const accordionContext = React.useMemo<AccordionContextValue>(
+    () => (accordion ? { activeId, setActive, defaultOpenRegisteredRef } : null),
+    [accordion, activeId, setActive],
+  );
+
   return (
     <MenuContext.Provider value={providerValue}>
       <LevelContext.Provider value={0}>
-        <StyledMenu
-          ref={ref}
-          className={classnames(menuClasses.root, className)}
-          rootStyles={rootStyles}
-          {...rest}
-        >
-          <StyledUl>{children}</StyledUl>
-        </StyledMenu>
+        <AccordionContext.Provider value={accordionContext}>
+          <StyledMenu
+            ref={ref}
+            className={classnames(menuClasses.root, className)}
+            rootStyles={rootStyles}
+            {...rest}
+          >
+            <StyledUl>{children}</StyledUl>
+          </StyledMenu>
+        </AccordionContext.Provider>
       </LevelContext.Provider>
     </MenuContext.Provider>
   );

@@ -166,3 +166,60 @@ export const RootStyles: StoryFn<typeof Menu> = () => (
 );
 
 RootStyles.storyName = 'rootStyles';
+
+export const Accordion: StoryFn<typeof Menu> = () => (
+  <div style={{ display: 'flex', height: '100%' }}>
+    <Sidebar>
+      <Menu accordion>
+        <SubMenu label="Charts" icon={<Icon name="bar-chart" />}>
+          <MenuItem> Pie charts</MenuItem>
+          <MenuItem> Line charts</MenuItem>
+          <MenuItem> Bar charts</MenuItem>
+        </SubMenu>
+        <SubMenu label="E-commerce" icon={<Icon name="shopping-cart" />}>
+          <MenuItem> Orders</MenuItem>
+          <MenuItem> Products</MenuItem>
+          <MenuItem> Customers</MenuItem>
+        </SubMenu>
+        <SubMenu label="Calendar" icon={<Icon name="calendar" />}>
+          <MenuItem> Schedule</MenuItem>
+          <MenuItem> Events</MenuItem>
+        </SubMenu>
+        <MenuItem icon={<Icon name="service" />}> Documentation</MenuItem>
+      </Menu>
+    </Sidebar>
+  </div>
+);
+
+Accordion.storyName = 'accordion';
+
+Accordion.parameters = {
+  docs: {
+    description: {
+      story:
+        'When `accordion` is set on `Menu`, only one top-level `SubMenu` can be open at a time. Opening another automatically closes the previously open one. Nested submenus are not affected — set `accordion` on a `SubMenu` to coordinate its direct children.',
+    },
+    source: {
+      code: `
+      import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
+
+      () => (
+        <Sidebar>
+          <Menu accordion>
+            <SubMenu label="Charts">
+              <MenuItem>Pie charts</MenuItem>
+              <MenuItem>Line charts</MenuItem>
+            </SubMenu>
+            <SubMenu label="E-commerce">
+              <MenuItem>Orders</MenuItem>
+              <MenuItem>Products</MenuItem>
+            </SubMenu>
+            <SubMenu label="Calendar">
+              <MenuItem>Schedule</MenuItem>
+            </SubMenu>
+          </Menu>
+        </Sidebar>
+      )`,
+    },
+  },
+};
