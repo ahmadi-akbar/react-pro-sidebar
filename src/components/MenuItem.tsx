@@ -182,4 +182,8 @@ export const MenuItemFR: React.ForwardRefRenderFunction<HTMLLIElement, MenuItemP
   );
 };
 
-export const MenuItem = React.forwardRef<HTMLLIElement, MenuItemProps>(MenuItemFR);
+// Memoized so static items skip re-rendering when an ancestor re-renders with
+// referentially-stable props (context changes still update them as usual).
+export const MenuItem = React.memo(React.forwardRef<HTMLLIElement, MenuItemProps>(MenuItemFR));
+
+MenuItem.displayName = 'MenuItem';

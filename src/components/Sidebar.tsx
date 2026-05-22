@@ -271,6 +271,11 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
 
     const isOverlayOpen = !!(broken && toggledValue);
 
+    const sidebarContextValue = React.useMemo(
+      () => ({ collapsed: collapsedValue, toggled: toggledValue, rtl, transitionDuration }),
+      [collapsedValue, toggledValue, rtl, transitionDuration],
+    );
+
     React.useEffect(() => {
       breakpointCallbackFnRef.current?.(broken);
     }, [broken]);
@@ -298,9 +303,7 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
     }, [isOverlayOpen, onBackdropClick]);
 
     return (
-      <SidebarContext.Provider
-        value={{ collapsed: collapsedValue, toggled: toggledValue, rtl, transitionDuration }}
-      >
+      <SidebarContext.Provider value={sidebarContextValue}>
         <StyledSidebar
           ref={setSidebarRef}
           data-testid={`${sidebarClasses.root}-test-id`}
