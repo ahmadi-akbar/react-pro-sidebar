@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 import React from 'react';
 import styled, { CSSObject } from '@emotion/styled';
 import classnames from 'classnames';
@@ -149,15 +148,13 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
     rtl,
     transitionDuration: sidebarTransitionDuration,
   } = React.useContext(SidebarContext);
-  const { renderExpandIcon, closeOnClick, menuItemStyles, transitionDuration } = useMenu();
+  const { renderExpandIcon, closeOnClick, menuItemStyles } = useMenu();
 
   const [open, setOpen] = React.useState(!!defaultOpen);
   const [openWhenCollapsed, setOpenWhenCollapsed] = React.useState(false);
-  const [mounted, setMounted] = React.useState(false);
 
   const buttonRef = React.useRef<HTMLAnchorElement>(null);
   const contentRef = React.useRef<HTMLDivElement>(null);
-  const timer = React.useRef<ReturnType<typeof setTimeout>>();
 
   const { popperInstance } = usePopper({
     level,
@@ -165,37 +162,11 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
     contentRef,
   });
 
-  const expandContent = React.useCallback(() => {
-    const target = contentRef.current;
-    if (target) {
-      const height = target?.querySelector(`.${menuClasses.subMenuContent} > ul`)?.clientHeight;
-      target.style.overflow = 'hidden';
-      target.style.height = `${height}px`;
-
-      timer.current = setTimeout(() => {
-        target.style.overflow = 'auto';
-        target.style.height = 'auto';
-      }, transitionDuration);
-    }
-  }, [transitionDuration]);
-
-  const collapseContent = () => {
-    const target = contentRef.current;
-
-    if (target) {
-      const height = target?.querySelector(`.${menuClasses.subMenuContent} > ul`)?.clientHeight;
-      target.style.overflow = 'hidden';
-      target.style.height = `${height}px`;
-      target.offsetHeight;
-      target.style.height = '0px';
-    }
-  };
-
+  // The content slides open/closed via CSS (grid-template-rows); we just flip
+  // the open state here.
   const handleSlideToggle = (): void => {
     if (!(level === 0 && collapsed)) {
       if (typeof openControlled === 'undefined') {
-        clearTimeout(Number(timer.current));
-        open ? collapseContent() : expandContent();
         onOpenChange?.(!open);
         setOpen(!open);
       } else {
@@ -203,19 +174,6 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
       }
     }
   };
-
-  React.useEffect(() => {
-    if (!(level === 0 && collapsed) && typeof openControlled !== 'undefined' && mounted) {
-      clearTimeout(Number(timer.current));
-      !openControlled ? collapseContent() : expandContent();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collapsed, expandContent, level, openControlled]);
-
-  // Clear any pending slide-animation timer when the submenu unmounts.
-  React.useEffect(() => {
-    return () => clearTimeout(Number(timer.current));
-  }, []);
 
   const handleOnClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     onClick?.(event);
@@ -234,14 +192,21 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
   const getSubMenuItemStyles = (element: MenuItemElement): CSSObject | undefined =>
     resolveElementStyles(menuItemStyles, element, styleParams);
 
+  // Reposition the popper after the sidebar's collapse/rtl transition.
   React.useEffect(() => {
-    setTimeout(() => popperInstance?.update(), sidebarTransitionDuration);
+    const timer = setTimeout(() => popperInstance?.update(), sidebarTransitionDuration);
+    return () => clearTimeout(timer);
+  }, [collapsed, level, rtl, sidebarTransitionDuration, popperInstance]);
+
+  // Reset the collapsed popup to closed only when the collapse state actually
+  // changes (not when the popper instance first becomes available).
+  React.useEffect(() => {
     if (collapsed && level === 0) {
       setOpenWhenCollapsed(false);
       // ? if its useful to close first level submenus on collapse sidebar uncomment the code below
       // setOpen(false);
     }
-  }, [collapsed, level, rtl, sidebarTransitionDuration, popperInstance]);
+  }, [collapsed, level]);
 
   React.useEffect(() => {
     const handleTogglePopper = (target: Node) => {
@@ -285,10 +250,6 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
       removeEventListeners();
     };
   }, [collapsed, level, closeOnClick, openWhenCollapsed]);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const sharedClasses = {
     [menuClasses.active]: active,
@@ -399,7 +360,6 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
         open={openControlled ?? open}
         firstLevel={level === 0}
         collapsed={collapsed}
-        defaultOpen={(openControlled && !mounted) || defaultOpen}
         className={classnames(menuClasses.subMenuContent, sharedClasses)}
         rootStyles={getSubMenuItemStyles('subMenuContent')}
       >

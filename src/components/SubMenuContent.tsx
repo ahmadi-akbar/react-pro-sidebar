@@ -10,40 +10,51 @@ interface SubMenuContentProps extends React.HTMLAttributes<HTMLDivElement> {
   openWhenCollapsed?: boolean;
   firstLevel?: boolean;
   collapsed?: boolean;
-  defaultOpen?: boolean;
   rootStyles?: CSSObject;
   children?: React.ReactNode;
 }
 
+/**
+ * The submenu content slides open/closed purely with CSS by animating
+ * `grid-template-rows` between `0fr` and `1fr` — no JS height measurement.
+ * When the sidebar is collapsed, a top-level submenu instead becomes a fixed
+ * popup whose visibility is toggled.
+ */
 const StyledSubMenuContent = styled.div<SubMenuContentProps>`
-  height: 0px;
-  overflow: hidden;
+  display: grid;
+  grid-template-rows: ${({ open }) => (open ? '1fr' : '0fr')};
+  transition: grid-template-rows ${({ transitionDuration }) => transitionDuration}ms ease;
   z-index: 999;
-  transition: height ${({ transitionDuration }) => transitionDuration}ms;
   box-sizing: border-box;
   background-color: white;
+
+  > ul {
+    min-height: 0;
+    overflow: hidden;
+  }
 
   ${({ firstLevel, collapsed }) =>
     firstLevel &&
     collapsed &&
     `
-     background-color: white;
      box-shadow: 0 3px 6px -4px #0000001f, 0 6px 16px #00000014, 0 9px 28px 8px #0000000d;
      `}
-
-  ${({ defaultOpen }) => defaultOpen && 'height: auto;display: block;'}
 
   ${({ collapsed, firstLevel, openWhenCollapsed }) =>
     collapsed && firstLevel
       ? `
+      display: block!important;
       position: fixed;
       padding-left: 0px;
       width: 200px;
       border-radius: 4px;
       height: auto!important;
-      display: block!important;     
-      transition: none!important;     
+      transition: none!important;
       visibility: ${openWhenCollapsed ? 'visible' : 'hidden'};
+
+      > ul {
+        overflow: auto;
+      }
      `
       : `
       position: static!important;
@@ -54,11 +65,10 @@ const StyledSubMenuContent = styled.div<SubMenuContentProps>`
 `;
 
 const SubMenuContentFR: React.ForwardRefRenderFunction<HTMLDivElement, SubMenuContentProps> = (
-  { children, open, openWhenCollapsed, firstLevel, collapsed, defaultOpen, ...rest },
+  { children, open, openWhenCollapsed, firstLevel, collapsed, ...rest },
   ref,
 ) => {
   const { transitionDuration } = useMenu();
-  const [defaultOpenState] = React.useState(defaultOpen);
 
   // A collapsed top-level submenu opens as a popper (driven by `openWhenCollapsed`);
   // otherwise it slides open based on `open`. While hidden, mark the subtree `inert`
@@ -76,7 +86,6 @@ const SubMenuContentFR: React.ForwardRefRenderFunction<HTMLDivElement, SubMenuCo
       open={open}
       openWhenCollapsed={openWhenCollapsed}
       transitionDuration={transitionDuration}
-      defaultOpen={defaultOpenState}
       {...inertProps}
       {...rest}
     >
