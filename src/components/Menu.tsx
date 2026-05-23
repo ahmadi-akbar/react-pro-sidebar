@@ -60,6 +60,14 @@ export interface MenuContextProps {
   closeOnClick?: boolean;
 
   /**
+   * If set to true, top-level `SubMenu`s open as floating poppers even when the
+   * sidebar is expanded (instead of sliding open inline). Useful for tall
+   * sidebars with many items.
+   * @default ```false```
+   */
+  popover?: boolean;
+
+  /**
    * Apply styles to MenuItem and SubMenu components and their children
    */
   menuItemStyles?: MenuItemStyles;
@@ -117,6 +125,7 @@ const MenuFR: React.ForwardRefRenderFunction<HTMLMenuElement, MenuProps> = (
     transitionDuration = 300,
     closeOnClick = false,
     accordion = false,
+    popover = false,
     rootStyles,
     menuItemStyles,
     renderExpandIcon,
@@ -125,8 +134,8 @@ const MenuFR: React.ForwardRefRenderFunction<HTMLMenuElement, MenuProps> = (
   ref,
 ) => {
   const providerValue = React.useMemo(
-    () => ({ transitionDuration, closeOnClick, menuItemStyles, renderExpandIcon }),
-    [transitionDuration, closeOnClick, menuItemStyles, renderExpandIcon],
+    () => ({ transitionDuration, closeOnClick, popover, menuItemStyles, renderExpandIcon }),
+    [transitionDuration, closeOnClick, popover, menuItemStyles, renderExpandIcon],
   );
 
   const [activeId, setActiveId] = React.useState<string | null>(null);

@@ -269,4 +269,46 @@ describe('SubMenu', () => {
       await waitFor(() => expect(content).toHaveStyle({ visibility: 'hidden' }));
     });
   });
+
+  describe('popover (flyout) behavior', () => {
+    it('opens a top-level submenu as a popper when Menu.popover is set, even while expanded', async () => {
+      renderSubMenu({}, { popover: true }); // sidebar NOT collapsed
+
+      const trigger = screen.getByRole('button', { name: 'Charts' });
+      const content = screen.getByTestId(`${menuClasses.subMenuContent}-test-id`);
+
+      // popover triggers expose aria-haspopup
+      expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
+
+      fireEvent.click(trigger);
+      await waitFor(() => expect(content).toHaveStyle({ visibility: 'visible' }));
+
+      fireEvent.keyUp(document, { key: 'Escape' });
+      await waitFor(() => expect(content).toHaveStyle({ visibility: 'hidden' }));
+    });
+
+    it('does not put nested (level > 0) submenus into popover mode', () => {
+      customRender(
+        <Sidebar>
+          <Menu popover>
+            <SubMenu label="Top">
+              <SubMenu label="Nested">
+                <MenuItem>Leaf</MenuItem>
+              </SubMenu>
+            </SubMenu>
+          </Menu>
+        </Sidebar>,
+      );
+
+      // top-level submenu is a popover trigger
+      const top = screen.getByRole('button', { name: 'Top' });
+      expect(top).toHaveAttribute('aria-haspopup', 'menu');
+
+      // open the popover so the nested submenu leaves the inert subtree
+      fireEvent.click(top);
+
+      // the nested (level > 1) submenu is not a popover — it slides inline
+      expect(screen.getByRole('button', { name: 'Nested' })).not.toHaveAttribute('aria-haspopup');
+    });
+  });
 });

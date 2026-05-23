@@ -193,6 +193,57 @@ export const Accordion: StoryFn<typeof Menu> = () => (
 
 Accordion.storyName = 'accordion';
 
+export const Popover: StoryFn<typeof Menu> = () => (
+  <div style={{ display: 'flex', height: '100%' }}>
+    <Sidebar>
+      <Menu popover>
+        <SubMenu label="Charts" icon={<Icon name="bar-chart" />}>
+          <MenuItem> Pie charts</MenuItem>
+          <MenuItem> Line charts</MenuItem>
+          <MenuItem> Bar charts</MenuItem>
+        </SubMenu>
+        <SubMenu label="E-commerce" icon={<Icon name="shopping-cart" />}>
+          <MenuItem> Orders</MenuItem>
+          <MenuItem> Products</MenuItem>
+        </SubMenu>
+        <MenuItem icon={<Icon name="calendar" />}> Calendar</MenuItem>
+        <MenuItem icon={<Icon name="service" />}> Documentation</MenuItem>
+      </Menu>
+    </Sidebar>
+  </div>
+);
+
+Popover.storyName = 'popover';
+
+Popover.parameters = {
+  docs: {
+    description: {
+      story:
+        'With `popover` set on `Menu`, top-level `SubMenu`s open as floating poppers (to the side) even while the sidebar is expanded — instead of sliding open inline. Useful for tall sidebars with many items. Click a submenu to open its flyout; click elsewhere or press Escape to close.',
+    },
+    source: {
+      code: `
+      import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
+
+      () => (
+        <Sidebar>
+          <Menu popover>
+            <SubMenu label="Charts">
+              <MenuItem>Pie charts</MenuItem>
+              <MenuItem>Line charts</MenuItem>
+            </SubMenu>
+            <SubMenu label="E-commerce">
+              <MenuItem>Orders</MenuItem>
+              <MenuItem>Products</MenuItem>
+            </SubMenu>
+            <MenuItem>Calendar</MenuItem>
+          </Menu>
+        </Sidebar>
+      )`,
+    },
+  },
+};
+
 Accordion.parameters = {
   docs: {
     description: {

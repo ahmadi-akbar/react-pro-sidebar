@@ -8,8 +8,8 @@ interface SubMenuContentProps extends React.HTMLAttributes<HTMLDivElement> {
   transitionDuration?: number;
   open?: boolean;
   openWhenCollapsed?: boolean;
-  firstLevel?: boolean;
-  collapsed?: boolean;
+  /** Render as a floating popper (collapsed top-level submenu, or popover mode). */
+  popper?: boolean;
   rootStyles?: CSSObject;
   children?: React.ReactNode;
 }
@@ -17,8 +17,8 @@ interface SubMenuContentProps extends React.HTMLAttributes<HTMLDivElement> {
 /**
  * The submenu content slides open/closed purely with CSS by animating
  * `grid-template-rows` between `0fr` and `1fr` — no JS height measurement.
- * When the sidebar is collapsed, a top-level submenu instead becomes a fixed
- * popup whose visibility is toggled.
+ * In popper mode (collapsed top-level submenu, or `popover` while expanded) it
+ * instead becomes a fixed popup whose visibility is toggled.
  */
 const StyledSubMenuContent = styled.div<SubMenuContentProps>`
   display: grid;
@@ -33,15 +33,14 @@ const StyledSubMenuContent = styled.div<SubMenuContentProps>`
     overflow: hidden;
   }
 
-  ${({ firstLevel, collapsed }) =>
-    firstLevel &&
-    collapsed &&
+  ${({ popper }) =>
+    popper &&
     `
      box-shadow: 0 3px 6px -4px #0000001f, 0 6px 16px #00000014, 0 9px 28px 8px #0000000d;
      `}
 
-  ${({ collapsed, firstLevel, openWhenCollapsed }) =>
-    collapsed && firstLevel
+  ${({ popper, openWhenCollapsed }) =>
+    popper
       ? `
       display: block!important;
       position: fixed;
@@ -65,15 +64,15 @@ const StyledSubMenuContent = styled.div<SubMenuContentProps>`
 `;
 
 const SubMenuContentFR: React.ForwardRefRenderFunction<HTMLDivElement, SubMenuContentProps> = (
-  { children, open, openWhenCollapsed, firstLevel, collapsed, ...rest },
+  { children, open, openWhenCollapsed, popper, ...rest },
   ref,
 ) => {
   const { transitionDuration } = useMenu();
 
-  // A collapsed top-level submenu opens as a popper (driven by `openWhenCollapsed`);
-  // otherwise it slides open based on `open`. While hidden, mark the subtree `inert`
+  // In popper mode visibility is driven by `openWhenCollapsed`; otherwise the
+  // submenu slides open based on `open`. While hidden, mark the subtree `inert`
   // so its links stay out of the tab order and the accessibility tree.
-  const isVisible = firstLevel && collapsed ? !!openWhenCollapsed : !!open;
+  const isVisible = popper ? !!openWhenCollapsed : !!open;
   // `inert` typing differs between React 18 and 19 type packages, so apply it untyped.
   const inertProps = (isVisible ? {} : { inert: '' }) as object;
 
@@ -81,8 +80,7 @@ const SubMenuContentFR: React.ForwardRefRenderFunction<HTMLDivElement, SubMenuCo
     <StyledSubMenuContent
       data-testid={`${menuClasses.subMenuContent}-test-id`}
       ref={ref}
-      firstLevel={firstLevel}
-      collapsed={collapsed}
+      popper={popper}
       open={open}
       openWhenCollapsed={openWhenCollapsed}
       transitionDuration={transitionDuration}

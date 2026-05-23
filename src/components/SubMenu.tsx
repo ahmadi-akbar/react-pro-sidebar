@@ -164,7 +164,11 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
     rtl,
     transitionDuration: sidebarTransitionDuration,
   } = React.useContext(SidebarContext);
-  const { renderExpandIcon, closeOnClick, menuItemStyles } = useMenu();
+  const { renderExpandIcon, closeOnClick, popover, menuItemStyles } = useMenu();
+
+  // Top-level submenus render as a floating popper when the sidebar is
+  // collapsed, or when `popover` mode is enabled while expanded.
+  const isPopper = (collapsed || !!popover) && level === 0;
 
   const [internalOpen, setInternalOpen] = React.useState(!!defaultOpen);
   const [openWhenCollapsed, setOpenWhenCollapsed] = React.useState(false);
@@ -173,7 +177,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   const { popperInstance } = usePopper({
-    level,
+    popper: isPopper,
     buttonRef,
     contentRef,
   });
@@ -213,7 +217,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
   // The content slides open/closed via CSS (grid-template-rows); we just flip
   // the open state here (or hand it off to the accordion).
   const handleSlideToggle = (): void => {
-    if (!(level === 0 && collapsed)) {
+    if (!isPopper) {
       if (typeof openControlled === 'undefined') {
         const next = !open;
         if (parentAccordion) {
@@ -269,15 +273,15 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
     return () => clearTimeout(timer);
   }, [collapsed, level, rtl, sidebarTransitionDuration, popperInstance]);
 
-  // Reset the collapsed popup to closed only when the collapse state actually
-  // changes (not when the popper instance first becomes available).
+  // Reset the popper to closed when the popper mode toggles (entering collapsed
+  // or popover mode) — not when the popper instance first becomes available.
   React.useEffect(() => {
-    if (collapsed && level === 0) {
+    if (isPopper) {
       setOpenWhenCollapsed(false);
       // ? if its useful to close first level submenus on collapse sidebar uncomment the code below
       // setOpen(false);
     }
-  }, [collapsed, level]);
+  }, [isPopper]);
 
   React.useEffect(() => {
     const handleTogglePopper = (target: Node) => {
@@ -312,7 +316,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
 
     removeEventListeners();
 
-    if (collapsed && level === 0) {
+    if (isPopper) {
       document.addEventListener('click', handleDocumentClick, false);
       document.addEventListener('keyup', handleDocumentKeyUp, false);
     }
@@ -320,7 +324,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
     return () => {
       removeEventListeners();
     };
-  }, [collapsed, level, closeOnClick, openWhenCollapsed]);
+  }, [isPopper, closeOnClick, openWhenCollapsed]);
 
   const sharedClasses = {
     [menuClasses.active]: active,
@@ -357,7 +361,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
         tabIndex={0}
         role="button"
         aria-expanded={open}
-        aria-haspopup={collapsed && level === 0 ? 'menu' : undefined}
+        aria-haspopup={isPopper ? 'menu' : undefined}
         aria-disabled={disabled || undefined}
         {...rest}
       >
@@ -429,8 +433,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
         ref={contentRef}
         openWhenCollapsed={openWhenCollapsed}
         open={open}
-        firstLevel={level === 0}
-        collapsed={collapsed}
+        popper={isPopper}
         className={classnames(menuClasses.subMenuContent, sharedClasses)}
         rootStyles={getSubMenuItemStyles('subMenuContent')}
       >

@@ -1,4 +1,3 @@
-/* eslint-disable react/display-name -- inline render wrappers don't need display names */
 import React from 'react';
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
@@ -7,7 +6,6 @@ import { useMenu } from '../src/hooks/useMenu';
 import { useMediaQuery } from '../src/hooks/useMediaQuery';
 import { usePopper } from '../src/hooks/usePopper';
 import { MenuContext } from '../src/components/Menu';
-import { SidebarContext } from '../src/components/Sidebar';
 
 // vitest hoists vi.mock above the imports above.
 vi.mock('@popperjs/core', () => ({
@@ -124,36 +122,15 @@ describe('usePopper', () => {
     contentRef: { current: document.createElement('div') } as React.RefObject<HTMLDivElement>,
   });
 
-  const wrapperWith =
-    (collapsed: boolean) =>
-    ({ children }: { children: React.ReactNode }) =>
-      (
-        <SidebarContext.Provider value={{ collapsed, transitionDuration: 300 }}>
-          {children}
-        </SidebarContext.Provider>
-      );
-
-  it('does not create a popper for non-top-level submenus', () => {
+  it('does not create a popper when popper is false', () => {
     const { buttonRef, contentRef } = makeRefs();
-    renderHook(() => usePopper({ level: 1, buttonRef, contentRef }), {
-      wrapper: wrapperWith(true),
-    });
+    renderHook(() => usePopper({ popper: false, buttonRef, contentRef }));
     expect(createPopper).not.toHaveBeenCalled();
   });
 
-  it('does not create a popper when the sidebar is expanded', () => {
+  it('creates a popper when popper is true', () => {
     const { buttonRef, contentRef } = makeRefs();
-    renderHook(() => usePopper({ level: 0, buttonRef, contentRef }), {
-      wrapper: wrapperWith(false),
-    });
-    expect(createPopper).not.toHaveBeenCalled();
-  });
-
-  it('creates a popper for a collapsed top-level submenu', () => {
-    const { buttonRef, contentRef } = makeRefs();
-    renderHook(() => usePopper({ level: 0, buttonRef, contentRef }), {
-      wrapper: wrapperWith(true),
-    });
+    renderHook(() => usePopper({ popper: true, buttonRef, contentRef }));
     expect(createPopper).toHaveBeenCalledWith(
       buttonRef.current,
       contentRef.current,
@@ -175,9 +152,7 @@ describe('usePopper', () => {
     global.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
 
     const { buttonRef, contentRef } = makeRefs();
-    const { unmount } = renderHook(() => usePopper({ level: 0, buttonRef, contentRef }), {
-      wrapper: wrapperWith(true),
-    });
+    const { unmount } = renderHook(() => usePopper({ popper: true, buttonRef, contentRef }));
 
     expect(observe).toHaveBeenCalled();
     expect(disconnect).not.toHaveBeenCalled();

@@ -253,10 +253,22 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
             <td>-</td>
         </tr>
          <tr>
-            <td rowspan=5>Menu</td>
+            <td rowspan=7>Menu</td>
             <td>closeOnClick</td>
             <td><code>boolean</code></td>
             <td>If <code>true</code> and sidebar is in collapsed state, submenu popper will automatically close on MenuItem click</td>
+            <td><code>false</code></td>
+        </tr>
+         <tr>
+            <td>popover</td>
+            <td><code>boolean</code></td>
+            <td>If <code>true</code>, top-level SubMenus open as floating poppers even when the sidebar is expanded (instead of sliding open inline)</td>
+            <td><code>false</code></td>
+        </tr>
+         <tr>
+            <td>accordion</td>
+            <td><code>boolean</code></td>
+            <td>If <code>true</code>, only one top-level SubMenu can be open at a time; opening another closes the previously open one</td>
             <td><code>false</code></td>
         </tr>
          <tr>
@@ -327,7 +339,7 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
             <td>-</td>
         </tr>
         <tr>
-            <td rowspan=11>SubMenu</td>
+            <td rowspan=12>SubMenu</td>
             <td>label</td>
             <td><code>string | ReactNode</code></td>
             <td>Label for the submenu </td>
@@ -374,6 +386,12 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
             <td><code>ReactNode</code></td>
             <td>Add a suffix to the submenu </td>
             <td>-</td>
+        </tr>
+        <tr>
+            <td>accordion</td>
+            <td><code>boolean</code></td>
+            <td>If <code>true</code>, only one of this submenu's direct child SubMenus can be open at a time</td>
+            <td><code>false</code></td>
         </tr>
         <tr>
             <td>onOpenChange</td>
