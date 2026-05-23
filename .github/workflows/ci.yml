@@ -10,6 +10,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Explicit read permission so checkout can authenticate even when the
+# repository's default workflow token permissions are restricted.
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Lint
@@ -18,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: yarn
       - run: yarn install --frozen-lockfile
       - run: yarn lint
@@ -30,7 +35,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: yarn
       - run: yarn install --frozen-lockfile
       - run: yarn typecheck
@@ -41,7 +46,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [18, 20, 22]
+        # Active LTS versions. The dev toolchain (vitest 4, size-limit 12)
+        # requires Node >= 20; the library itself still works on older Node.
+        node: [22, 24]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -62,7 +69,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: yarn
       - run: yarn install --frozen-lockfile
       - run: yarn add -D --ignore-scripts react@${{ matrix.react }} react-dom@${{ matrix.react }}
@@ -75,7 +82,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: yarn
       - run: yarn install --frozen-lockfile
       - run: yarn build
@@ -87,7 +94,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: yarn
       - run: yarn install --frozen-lockfile
       - run: yarn build
