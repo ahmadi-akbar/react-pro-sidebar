@@ -73,8 +73,10 @@ const SubMenuContentFR: React.ForwardRefRenderFunction<HTMLDivElement, SubMenuCo
   // submenu slides open based on `open`. While hidden, mark the subtree `inert`
   // so its links stay out of the tab order and the accessibility tree.
   const isVisible = popper ? !!openWhenCollapsed : !!open;
-  // `inert` typing differs between React 18 and 19 type packages, so apply it untyped.
-  const inertProps = (isVisible ? {} : { inert: '' }) as object;
+  // `inert` is a real boolean prop in React 19 (an empty string is falsy and
+  // gets dropped), but untyped in React 18 — pass boolean `true` and apply it
+  // untyped so it renders a present attribute on both.
+  const inertProps = (isVisible ? {} : { inert: 'true' }) as object;
 
   return (
     <StyledSubMenuContent
