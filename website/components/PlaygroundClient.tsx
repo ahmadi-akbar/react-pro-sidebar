@@ -26,6 +26,8 @@ import {
   ShoppingCart,
   Service,
 } from './playground/icons';
+import { CodePanel } from './playground/CodePanel';
+import { generateCode } from './playground/generateCode';
 
 type Theme = 'light' | 'dark';
 type BreakPoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'all' | 'none';
@@ -115,6 +117,9 @@ const strings = {
     statusBroken: 'Broken',
     statusExpanded: 'Expanded',
     statusCollapsed: 'Collapsed',
+    generatedCode: 'Generated code',
+    copy: 'Copy',
+    copied: 'Copied!',
   },
   ar: {
     sectionGeneral: 'عام',
@@ -170,6 +175,9 @@ const strings = {
     statusBroken: 'مكسور',
     statusExpanded: 'موسّع',
     statusCollapsed: 'مطوي',
+    generatedCode: 'الكود المولّد',
+    copy: 'نسخ',
+    copied: 'تم النسخ!',
   },
 };
 
@@ -271,6 +279,21 @@ export default function PlaygroundClient() {
     },
     label: ({ open }) => ({ fontWeight: open ? 600 : undefined }),
   };
+
+  const generatedCode = generateCode({
+    collapsed,
+    toggled,
+    rtl,
+    hasImage,
+    popover,
+    accordion,
+    closeOnClick,
+    theme,
+    width,
+    collapsedWidth,
+    breakPoint,
+    transitionDuration,
+  });
 
   const breakPointOptions = [
     { value: 'none', label: t.breakPointNone },
@@ -556,6 +579,28 @@ export default function PlaygroundClient() {
                 options={breakPointOptions}
               />
             </ControlGroup>
+          </div>
+
+          {/* Generated-code preview with copy-to-clipboard */}
+          <div style={{ marginTop: 32 }}>
+            <h3
+              style={{
+                margin: '0 0 10px',
+                fontSize: 11,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                opacity: 0.6,
+              }}
+            >
+              {t.generatedCode}
+            </h3>
+            <CodePanel
+              code={generatedCode}
+              title="App.jsx"
+              copyLabel={t.copy}
+              copiedLabel={t.copied}
+            />
           </div>
         </div>
       </main>

@@ -14,7 +14,11 @@
 [npm-url]: https://www.npmjs.com/package/react-pro-sidebar
 [github-url]: https://github.com/azouaoui-med/react-pro-sidebar
 
-React Pro Sidebar provides a set of components for creating high level and customizable side navigation
+The ultimate sidebar component for React applications. Highly customizable, fully responsive, and effortless to integrate into any dashboard.
+
+## Documentation
+
+Full documentation, guides and live examples are available at **[react-pro-sidebar.netlify.app](https://react-pro-sidebar.netlify.app/)**.
 
 ## Old versions
 
@@ -22,7 +26,7 @@ React Pro Sidebar provides a set of components for creating high level and custo
 
 ## Live Preview
 
-- [Demo](https://azouaoui-med.github.io/react-pro-sidebar/iframe.html?id=playground--playground&args=&viewMode=story)
+- [Playground](https://react-pro-sidebar.netlify.app/playground)
 
 - [Storybook](https://azouaoui-med.github.io/react-pro-sidebar/?path=/docs/sidebar--basic)
 
@@ -279,7 +283,7 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
         </tr>
          <tr>
             <td>renderExpandIcon</td>
-            <td><code>(params: { level: number; collapsed: boolean; disabled: boolean; active: boolean; open: boolean; }) => React.ReactNode</code></td>
+            <td><code>(params: { level: number; disabled: boolean; active: boolean; open: boolean; }) => React.ReactNode</code></td>
             <td>Render method for customizing submenu expand icon</td>
             <td>-</td>
         </tr>
@@ -366,7 +370,7 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
         <tr>
             <td>active</td>
             <td><code>boolean</code></td>
-            <td>If <code>true</code>, the component is active</td>
+            <td>If <code>true</code>, the component is active. Also set automatically when any descendant is active</td>
             <td><code>false</code></td>
         </tr>
          <tr>
