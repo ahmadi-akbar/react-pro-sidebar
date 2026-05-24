@@ -21,6 +21,8 @@ import {
   AccordionContextValue,
   LevelContext,
   resolveElementStyles,
+  SubMenuActiveContext,
+  SubMenuActiveContextValue,
 } from './Menu';
 
 export interface SubMenuProps
@@ -157,6 +159,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
 ) => {
   const level = React.useContext(LevelContext);
   const parentAccordion = React.useContext(AccordionContext);
+  const parentActive = React.useContext(SubMenuActiveContext);
   const id = React.useId();
 
   const {
@@ -244,7 +247,32 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
     }
   };
 
-  const styleParams = { level, disabled, active, isSubmenu: true, open };
+  // Track active descendants so this submenu highlights when any child is
+  // active, then report its own effective-active state up to its parent.
+  const [activeDescendants, setActiveDescendants] = React.useState<Set<string>>(() => new Set());
+  const registerActive = React.useCallback((childId: string, isActive: boolean) => {
+    setActiveDescendants((prev) => {
+      if (isActive === prev.has(childId)) return prev;
+      const next = new Set(prev);
+      if (isActive) next.add(childId);
+      else next.delete(childId);
+      return next;
+    });
+  }, []);
+
+  const effectiveActive = active || activeDescendants.size > 0;
+
+  React.useEffect(() => {
+    parentActive?.registerActive(id, effectiveActive);
+    return () => parentActive?.registerActive(id, false);
+  }, [parentActive, id, effectiveActive]);
+
+  const activeContextValue = React.useMemo<SubMenuActiveContextValue>(
+    () => ({ registerActive }),
+    [registerActive],
+  );
+
+  const styleParams = { level, disabled, active: effectiveActive, isSubmenu: true, open };
 
   // State for accordion-coordinating this submenu's direct children (next level).
   const [childActiveId, setChildActiveId] = React.useState<string | null>(null);
@@ -327,7 +355,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
   }, [isPopper, closeOnClick, openWhenCollapsed]);
 
   const sharedClasses = {
-    [menuClasses.active]: active,
+    [menuClasses.active]: effectiveActive,
     [menuClasses.disabled]: disabled,
     [menuClasses.open]: open,
   };
@@ -346,7 +374,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
       collapsed={collapsed}
       rtl={rtl}
       disabled={disabled}
-      active={active}
+      active={effectiveActive}
       buttonStyles={getSubMenuItemStyles('button')}
       rootStyles={rootStyles}
     >
@@ -418,8 +446,8 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
             renderExpandIcon({
               level,
               disabled,
-              active,
-              open: open,
+              active: effectiveActive,
+              open,
             })
           ) : collapsed && level === 0 ? (
             <StyledExpandIconCollapsed />
@@ -439,7 +467,9 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
       >
         <LevelContext.Provider value={level + 1}>
           <AccordionContext.Provider value={childAccordionContext}>
-            {children}
+            <SubMenuActiveContext.Provider value={activeContextValue}>
+              {children}
+            </SubMenuActiveContext.Provider>
           </AccordionContext.Provider>
         </LevelContext.Provider>
       </SubMenuContent>

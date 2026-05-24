@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **[Menu]** New `popover` prop — top-level `SubMenu`s open as floating poppers even when the sidebar is expanded (instead of sliding open inline)
 - **[Menu]** New `accordion` prop — when set, only one top-level `SubMenu` can be open at a time. Opening another closes the previously open one
 - **[SubMenu]** New `accordion` prop — coordinates only the submenu's direct children (per-level scope, independent of any ancestor accordion)
+- **[SubMenu]** Active state now cascades automatically — a `SubMenu` is marked active whenever any of its descendants is active
 - **[Sidebar]** Pressing `Escape` now closes the sidebar when open as an overlay (broken + toggled)
 - **[Sidebar]** Focus moves into the sidebar when it opens as an overlay
 - **[MenuItem]** `aria-current="page"` on active items and `aria-disabled` on disabled items

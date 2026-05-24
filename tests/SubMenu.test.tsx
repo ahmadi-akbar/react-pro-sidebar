@@ -105,6 +105,67 @@ describe('SubMenu', () => {
     expect(trigger).toHaveClass(menuClasses.disabled);
   });
 
+  describe('active cascade', () => {
+    it('marks the parent SubMenu active when a child MenuItem is active', () => {
+      customRender(
+        <Sidebar>
+          <Menu>
+            <SubMenu label="Parent" defaultOpen>
+              <MenuItem active>Child</MenuItem>
+            </SubMenu>
+          </Menu>
+        </Sidebar>,
+      );
+      expect(screen.getByRole('button', { name: 'Parent' })).toHaveClass(menuClasses.active);
+    });
+
+    it('cascades active up through all ancestor SubMenus', () => {
+      customRender(
+        <Sidebar>
+          <Menu>
+            <SubMenu label="Top" defaultOpen>
+              <SubMenu label="Mid" defaultOpen>
+                <MenuItem active>Leaf</MenuItem>
+              </SubMenu>
+            </SubMenu>
+          </Menu>
+        </Sidebar>,
+      );
+      expect(screen.getByRole('button', { name: 'Top' })).toHaveClass(menuClasses.active);
+      expect(screen.getByRole('button', { name: 'Mid' })).toHaveClass(menuClasses.active);
+    });
+
+    it('does not mark the parent active when no descendant is active', () => {
+      customRender(
+        <Sidebar>
+          <Menu>
+            <SubMenu label="Parent" defaultOpen>
+              <MenuItem>Child</MenuItem>
+            </SubMenu>
+          </Menu>
+        </Sidebar>,
+      );
+      expect(screen.getByRole('button', { name: 'Parent' })).not.toHaveClass(menuClasses.active);
+    });
+
+    it('removes the cascaded active when the child becomes inactive', () => {
+      const tree = (active: boolean) => (
+        <Sidebar>
+          <Menu>
+            <SubMenu label="Parent" defaultOpen>
+              <MenuItem active={active}>Child</MenuItem>
+            </SubMenu>
+          </Menu>
+        </Sidebar>
+      );
+      const { rerender } = customRender(tree(true));
+      expect(screen.getByRole('button', { name: 'Parent' })).toHaveClass(menuClasses.active);
+
+      rerender(tree(false));
+      expect(screen.getByRole('button', { name: 'Parent' })).not.toHaveClass(menuClasses.active);
+    });
+  });
+
   describe('accordion', () => {
     it('opens only one top-level SubMenu at a time when Menu.accordion is set', () => {
       customRender(

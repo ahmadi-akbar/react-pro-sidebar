@@ -8,7 +8,7 @@ import { useMenu } from '../hooks/useMenu';
 import { StyledMenuSuffix } from '../styles/StyledMenuSuffix';
 import { menuClasses } from '../utils/utilityClasses';
 import { MenuButton, menuButtonStyles } from './MenuButton';
-import { LevelContext, resolveElementStyles } from './Menu';
+import { LevelContext, resolveElementStyles, SubMenuActiveContext } from './Menu';
 import { SidebarContext } from './Sidebar';
 
 export interface MenuItemProps
@@ -103,6 +103,15 @@ export const MenuItemFR: React.ForwardRefRenderFunction<HTMLLIElement, MenuItemP
   const level = React.useContext(LevelContext);
   const { collapsed, rtl, transitionDuration } = React.useContext(SidebarContext);
   const { menuItemStyles } = useMenu();
+
+  // Report active state up to the nearest parent SubMenu so ancestors can
+  // highlight when this item is active.
+  const id = React.useId();
+  const parentActive = React.useContext(SubMenuActiveContext);
+  React.useEffect(() => {
+    parentActive?.registerActive(id, active);
+    return () => parentActive?.registerActive(id, false);
+  }, [parentActive, id, active]);
 
   const styleParams = { level, disabled, active, isSubmenu: false };
 

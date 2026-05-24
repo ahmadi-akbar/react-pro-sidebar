@@ -108,6 +108,18 @@ export type AccordionContextValue = {
 
 export const AccordionContext = React.createContext<AccordionContextValue>(null);
 
+/**
+ * Internal context used to cascade the `active` state up the tree: a child
+ * (MenuItem or SubMenu) reports its active state to the nearest parent SubMenu,
+ * which marks itself active when any descendant is active. `null` at the top
+ * level (no parent SubMenu to report to).
+ */
+export type SubMenuActiveContextValue = {
+  registerActive: (id: string, active: boolean) => void;
+} | null;
+
+export const SubMenuActiveContext = React.createContext<SubMenuActiveContextValue>(null);
+
 const StyledMenu = styled.nav<Pick<MenuProps, 'rootStyles'>>`
   &.${menuClasses.root} {
     ${({ rootStyles }) => rootStyles}

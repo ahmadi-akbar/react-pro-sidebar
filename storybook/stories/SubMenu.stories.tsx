@@ -144,25 +144,21 @@ export const Active: StoryFn<typeof SubMenu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
-        <Menu>
-          <SubMenu active label="Charts (active)">
-            <MenuItem> Pie charts</MenuItem>
-            <MenuItem> Line charts</MenuItem>
-            <MenuItem> Bar charts</MenuItem>
+        <SubMenu label="Settings" defaultOpen>
+          <SubMenu label="Account" defaultOpen>
+            <MenuItem active> Profile (active)</MenuItem>
+            <MenuItem> Password</MenuItem>
           </SubMenu>
-          <SubMenu label="Maps">
-            <MenuItem> Google maps</MenuItem>
-            <MenuItem> Open street maps</MenuItem>
+          <SubMenu label="Notifications">
+            <MenuItem> Email</MenuItem>
+            <MenuItem> Push</MenuItem>
           </SubMenu>
-          <SubMenu label="Theme">
-            <MenuItem> Dark</MenuItem>
-            <MenuItem> Light</MenuItem>
-          </SubMenu>
-        </Menu>
+        </SubMenu>
       </Menu>
     </Sidebar>
   </div>
 );
+
 Active.storyName = 'active';
 
 export const Disabled: StoryFn<typeof SubMenu> = () => (
