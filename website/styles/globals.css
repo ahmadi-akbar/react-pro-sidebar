@@ -1,0 +1,454 @@
+/* ============================================================
+   Global tweaks for the docs site
+   ============================================================ */
+
+html,
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* The home hero uses `width: 100vw` + negative margins to break out of the
+   article container. On desktops with a visible scrollbar, 100vw is wider
+   than the document area, which would introduce a tiny horizontal scroll.
+   Clamp it here. */
+body {
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   Top-nav sponsor heart (injected via navbar.extraContent)
+   ============================================================ */
+
+.rps-sponsor-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  margin-inline-end: 2px;
+  color: #db61a2;
+  transition: transform 0.18s ease, color 0.18s ease;
+  text-decoration: none;
+}
+
+.rps-sponsor-link:hover {
+  color: #ea4aaa;
+  transform: scale(1.15);
+}
+
+.rps-sponsor-link:focus-visible {
+  outline: 2px solid #db61a2;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   Live demo wrappers (used by component / example pages)
+   ============================================================ */
+
+.rps-demo {
+  border: 1px solid rgba(127, 127, 127, 0.2);
+  border-radius: 10px;
+  margin: 1.25rem 0;
+  overflow: hidden;
+  background: rgba(127, 127, 127, 0.04);
+}
+
+.rps-demo-frame {
+  display: flex;
+  min-height: 320px;
+  height: 360px;
+  background: #f7fafc;
+  color: #1f2937;
+}
+
+html.dark .rps-demo-frame {
+  /* Sit one notch below the sidebar's elevated surface (#1e293b) so the
+     sidebar reads as a distinct panel rather than blending in. */
+  background: #0b1220;
+  color: #e2e8f0;
+}
+
+.rps-demo-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(127, 127, 127, 0.2);
+  align-items: center;
+}
+
+.rps-demo-controls label {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.rps-demo-controls input[type='number'],
+.rps-demo-controls input[type='text'],
+.rps-demo-controls select {
+  padding: 4px 8px;
+  border: 1px solid rgba(127, 127, 127, 0.4);
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+}
+
+.rps-demo-main {
+  flex: 1;
+  padding: 16px 20px;
+  font-size: 14px;
+  overflow: auto;
+}
+
+/* ============================================================
+   Home — hero section
+   ============================================================ */
+
+/* Full-bleed, full-height hero: breaks out of the article container so the
+   radial-gradient backdrop spans edge-to-edge, and fills the viewport below
+   the Nextra header (which is 4rem / 64px tall by default). The
+   .rps-hero-inner below is constrained back to the same max-width / gutter
+   as the Nextra header so the content lines up vertically with the logo and
+   nav above it. */
+.rps-hero {
+  position: relative;
+  width: 100vw;
+  /* Pull from the centre of whatever parent we're in, out to the viewport edges. */
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  margin-top: -2rem;
+  margin-bottom: 4rem;
+  /* Fill the viewport minus the Nextra header height (~4rem). The extra 2rem
+     compensates for the negative margin-top above so the hero truly starts at
+     the bottom of the header. */
+  min-height: calc(100vh - 4rem + 2rem);
+  padding: 4rem 0;
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .rps-hero {
+    /* Stacked layout needs a bit more breathing room; let it grow naturally
+       below the viewport on small screens rather than cramming everything in. */
+    min-height: auto;
+    padding: 4rem 0 5rem;
+  }
+}
+
+/* Soft radial gradient backdrop — light/dark aware */
+.rps-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(circle at 15% 20%, rgba(89, 208, 255, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 85% 60%, rgba(0, 152, 229, 0.18) 0%, transparent 45%);
+}
+
+html.dark .rps-hero::before {
+  background: radial-gradient(circle at 15% 20%, rgba(89, 208, 255, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 85% 60%, rgba(124, 58, 237, 0.22) 0%, transparent 45%);
+}
+
+/* Subtle grid pattern */
+.rps-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: linear-gradient(rgba(127, 127, 127, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(127, 127, 127, 0.07) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+
+.rps-hero-inner {
+  /* Same constraints as the Nextra docs-theme header */
+  max-width: 90rem;
+  margin: 0 auto;
+  padding-left: max(env(safe-area-inset-left), 1.5rem);
+  padding-right: max(env(safe-area-inset-right), 1.5rem);
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .rps-hero-inner {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+/* --- Left column --- */
+
+.rps-hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.rps-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  background: rgba(0, 152, 229, 0.1);
+  color: #0098e5;
+  border: 1px solid rgba(0, 152, 229, 0.25);
+}
+
+html.dark .rps-pill {
+  background: rgba(89, 208, 255, 0.1);
+  color: #59d0ff;
+  border-color: rgba(89, 208, 255, 0.3);
+}
+
+.rps-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.rps-hero-title {
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0;
+  background: linear-gradient(135deg, #0098e5 0%, #59d0ff 60%, #7c3aed 110%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html.dark .rps-hero-title {
+  background: linear-gradient(135deg, #59d0ff 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rps-hero-subtitle {
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  line-height: 1.6;
+  max-width: 540px;
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* CTAs */
+
+.rps-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 0.25rem;
+}
+
+.rps-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 22px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none !important;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+  cursor: pointer;
+}
+
+.rps-btn:hover {
+  transform: translateY(-1px);
+}
+
+.rps-btn-primary {
+  background: linear-gradient(135deg, #0098e5 0%, #59d0ff 100%);
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(0, 152, 229, 0.3);
+}
+
+.rps-btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(0, 152, 229, 0.4);
+}
+
+.rps-btn-ghost {
+  background: transparent;
+  color: inherit !important;
+  border-color: rgba(127, 127, 127, 0.35);
+}
+
+.rps-btn-ghost:hover {
+  background: rgba(127, 127, 127, 0.08);
+  border-color: rgba(127, 127, 127, 0.5);
+}
+
+/* Badges row */
+
+.rps-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 0.75rem;
+  align-items: center;
+}
+
+.rps-badges img {
+  display: block;
+  height: 20px;
+}
+
+/* --- Right column: code preview --- */
+
+.rps-codeframe {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0b1220;
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  box-shadow: 0 24px 60px -20px rgba(0, 152, 229, 0.35), 0 12px 30px -10px rgba(0, 0, 0, 0.3);
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.rps-codeframe-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.rps-codeframe-header > span {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #4b5563;
+}
+
+.rps-codeframe-header > span:nth-child(1) {
+  background: #ff5f56;
+}
+.rps-codeframe-header > span:nth-child(2) {
+  background: #ffbd2e;
+}
+.rps-codeframe-header > span:nth-child(3) {
+  background: #27c93f;
+}
+
+.rps-codeframe-header em {
+  margin-left: auto;
+  font-style: normal;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+.rps-codeframe-body {
+  padding: 18px 20px;
+  margin: 0;
+  color: #e2e8f0;
+  overflow-x: auto;
+}
+
+.rps-codeframe-body .tok-kw {
+  color: #c084fc;
+}
+.rps-codeframe-body .tok-str {
+  color: #86efac;
+}
+.rps-codeframe-body .tok-tag {
+  color: #59d0ff;
+}
+.rps-codeframe-body .tok-attr {
+  color: #fbbf24;
+}
+.rps-codeframe-body .tok-com {
+  color: #64748b;
+  font-style: italic;
+}
+.rps-codeframe-body .tok-fn {
+  color: #60a5fa;
+}
+
+/* ============================================================
+   Home — feature grid
+   ============================================================ */
+
+.rps-features {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin: 1.5rem 0 2.5rem;
+}
+
+.rps-feature {
+  position: relative;
+  border: 1px solid rgba(127, 127, 127, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: rgba(127, 127, 127, 0.025);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.rps-feature:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 152, 229, 0.4);
+  box-shadow: 0 12px 30px -12px rgba(0, 152, 229, 0.2);
+}
+
+.rps-feature-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(0, 152, 229, 0.15), rgba(89, 208, 255, 0.1));
+  color: #0098e5;
+  margin-bottom: 14px;
+  /* SVG icons sized intrinsically (22px); kept slot height/width consistent. */
+}
+
+.rps-feature-icon svg {
+  display: block;
+}
+
+html.dark .rps-feature-icon {
+  color: #59d0ff;
+}
+
+.rps-feature h3 {
+  font-size: 1.05rem;
+  margin: 0 0 0.4rem;
+  font-weight: 700;
+}
+
+.rps-feature p {
+  margin: 0;
+  font-size: 0.93rem;
+  opacity: 0.78;
+  line-height: 1.55;
+}
+
+.rps-feature p code {
+  font-size: 0.85em;
+}

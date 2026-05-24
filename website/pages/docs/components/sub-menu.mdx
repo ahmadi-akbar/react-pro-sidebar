@@ -1,0 +1,216 @@
+---
+title: SubMenu
+description: A nestable, expandable submenu that holds MenuItem and SubMenu children. Cascades active state automatically.
+---
+
+import {
+  DefaultOpenDemo,
+  ControlledOpenDemo,
+  SubMenuAccordionDemo,
+  PrefixSuffixDemo,
+} from '../../../components/demos';
+
+# SubMenu
+
+`SubMenu` is an expandable container that holds `MenuItem` and other `SubMenu` children.
+When the sidebar is collapsed (or when `Menu`'s `popover` mode is enabled), top-level
+SubMenus open as floating poppers; otherwise they slide open inline.
+
+Active state **cascades automatically** in v2 — a `SubMenu` is marked active whenever any
+of its descendants is active, with no need for manual `active` prop management.
+
+```jsx
+<Menu>
+  <SubMenu label="Charts" icon={<ChartIcon />} defaultOpen>
+    <MenuItem>Pie</MenuItem>
+    <MenuItem>Line</MenuItem>
+  </SubMenu>
+</Menu>
+```
+
+## Props
+
+### `label`
+
+The submenu's label — usually a string, but any React node works.
+
+- **Type:** `string | ReactNode`
+- **Default:** `–`
+
+```jsx
+<SubMenu label="Charts">…</SubMenu>
+<SubMenu label={<span>Charts <Badge>6</Badge></span>}>…</SubMenu>
+```
+
+### `icon`
+
+Icon displayed before the label.
+
+- **Type:** `ReactNode`
+- **Default:** `–`
+
+```jsx
+<SubMenu label="Charts" icon={<ChartIcon />}>
+  …
+</SubMenu>
+```
+
+### `defaultOpen`
+
+Initial open state when used uncontrolled.
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+<DefaultOpenDemo />
+
+```jsx
+<SubMenu label="Charts" defaultOpen>
+  …
+</SubMenu>
+```
+
+### `open`
+
+Controlled open state. When set, the SubMenu becomes fully controlled — you own the
+state and must pair this with `onOpenChange`.
+
+- **Type:** `boolean`
+- **Default:** `–`
+
+<ControlledOpenDemo />
+
+```jsx
+const [open, setOpen] = useState(false);
+
+<SubMenu label="Charts" open={open} onOpenChange={setOpen}>
+  …
+</SubMenu>;
+```
+
+### `active`
+
+Forces the active visual state. Note: a SubMenu is **also** marked active automatically
+whenever any descendant is active (v2 behavior) — you only need this prop to force the
+state explicitly.
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+```jsx
+<SubMenu label="Charts" active>
+  …
+</SubMenu>
+```
+
+### `disabled`
+
+Disables the submenu trigger. Sets `aria-disabled`.
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+```jsx
+<SubMenu label="Charts" disabled>
+  …
+</SubMenu>
+```
+
+### `prefix`
+
+Node rendered between the icon and the label.
+
+- **Type:** `ReactNode`
+- **Default:** `–`
+
+<PrefixSuffixDemo />
+
+### `suffix`
+
+Node rendered after the label — common for badges, counts, or expand affordances.
+
+- **Type:** `ReactNode`
+- **Default:** `–`
+
+```jsx
+<SubMenu label="Charts" suffix={<Badge>6</Badge>}>
+  …
+</SubMenu>
+```
+
+### `accordion`
+
+> **New in v2.**
+
+When `true`, only one of this SubMenu's **direct child SubMenus** can be open at a time.
+The scope is per-level — accordions don't leak up to ancestors.
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+<SubMenuAccordionDemo />
+
+```jsx
+<SubMenu label="Components" accordion>
+  <SubMenu label="Forms">…</SubMenu>
+  <SubMenu label="Layout">…</SubMenu>
+  <SubMenu label="Display">…</SubMenu>
+</SubMenu>
+```
+
+### `onOpenChange`
+
+Called whenever the open state changes — for either controlled or uncontrolled SubMenus.
+
+- **Type:** `(open: boolean) => void`
+- **Default:** `–`
+
+```jsx
+<SubMenu label="Charts" onOpenChange={(open) => console.log('charts open:', open)}>
+  …
+</SubMenu>
+```
+
+### `component`
+
+Override the element used for the submenu trigger. Accepts a string tag name or a React
+element.
+
+- **Type:** `string | ReactElement`
+- **Default:** `–`
+
+```jsx
+<SubMenu label="Charts" component="div">
+  …
+</SubMenu>
+```
+
+### `rootStyles`
+
+Emotion `CSSObject` applied to the SubMenu's root `<li>` element.
+
+- **Type:** `CSSObject`
+- **Default:** `–`
+
+```jsx
+<SubMenu label="Charts" rootStyles={{ borderTop: '1px solid #eee' }}>
+  …
+</SubMenu>
+```
+
+## All props
+
+| Name | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `label` | `string \| ReactNode` | – | Label rendered on the trigger |
+| `icon` | `ReactNode` | – | Icon displayed before the label |
+| `defaultOpen` | `boolean` | `false` | Initial open state (uncontrolled) |
+| `open` | `boolean` | – | Controlled open state |
+| `active` | `boolean` | `false` | Forced active state (auto-cascades from descendants too) |
+| `disabled` | `boolean` | `false` | Disabled state (adds `aria-disabled`) |
+| `prefix` | `ReactNode` | – | Node between the icon and the label |
+| `suffix` | `ReactNode` | – | Node after the label |
+| `accordion` | `boolean` | `false` | **v2.** Only one direct-child SubMenu can be open at a time |
+| `onOpenChange` | `(open: boolean) => void` | – | Called when the open state changes |
+| `component` | `string \| ReactElement` | – | Element used for the trigger node |
+| `rootStyles` | `CSSObject` | – | Styles applied to the SubMenu root |

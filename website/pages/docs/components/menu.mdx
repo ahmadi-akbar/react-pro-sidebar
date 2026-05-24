@@ -1,0 +1,167 @@
+---
+title: Menu
+description: Container for MenuItem and SubMenu children — holds the styling system, accordion coordination, and popover mode.
+---
+
+import {
+  PopoverDemo,
+  AccordionDemo,
+  MenuItemStylesDemo,
+  CloseOnClickDemo,
+} from '../../../components/demos';
+
+# Menu
+
+The `Menu` is the styled container for `MenuItem` and `SubMenu` children. It owns:
+
+- The **styling system** (`menuItemStyles`) used to style children consistently
+- The **accordion** coordination for top-level SubMenus (`accordion` prop)
+- The **popover** mode that opens top-level SubMenus as floating poppers (`popover` prop)
+- The **slide transition** duration for inline submenus (`transitionDuration` prop)
+- The **render override** for expand icons (`renderExpandIcon` prop)
+
+You can nest multiple `Menu`s inside a single `Sidebar` (e.g. for distinct "General" and
+"Extras" sections — see the [Playground](/playground)).
+
+```jsx
+import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
+
+<Sidebar>
+  <Menu>
+    <SubMenu label="Charts">
+      <MenuItem>Pie</MenuItem>
+      <MenuItem>Line</MenuItem>
+    </SubMenu>
+    <MenuItem>Documentation</MenuItem>
+  </Menu>
+</Sidebar>;
+```
+
+## Props
+
+### `closeOnClick`
+
+When the sidebar is collapsed and a top-level submenu opens as a popper, clicking a
+`MenuItem` inside the popper closes it automatically. Has no effect on inline submenus.
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+<CloseOnClickDemo />
+
+### `popover`
+
+> **New in v2.**
+
+When `true`, top-level `SubMenu`s open as floating poppers even while the sidebar is
+expanded — instead of sliding open inline. Useful for tall sidebars with many items.
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+<PopoverDemo />
+
+```jsx
+<Menu popover>
+  <SubMenu label="Charts">…</SubMenu>
+</Menu>
+```
+
+### `accordion`
+
+> **New in v2.**
+
+When `true`, only one top-level `SubMenu` can be open at a time. Opening another
+automatically closes the previously open one.
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+<AccordionDemo />
+
+```jsx
+<Menu accordion>
+  <SubMenu label="Charts">…</SubMenu>
+  <SubMenu label="Components">…</SubMenu>
+</Menu>
+```
+
+### `menuItemStyles`
+
+The styling system: apply CSS to MenuItem / SubMenu and their inner slots — `root`,
+`button`, `label`, `icon`, `prefix`, `suffix`, `subMenuContent`, `SubMenuExpandIcon`.
+
+Each slot accepts a `CSSObject` or a function of the item's state
+(`{ level, active, disabled, isSubmenu, open }`).
+
+- **Type:** `MenuItemStyles`
+- **Default:** `–`
+
+<MenuItemStylesDemo />
+
+```jsx
+import { Menu, MenuItem, menuClasses, type MenuItemStyles } from 'react-pro-sidebar';
+
+const menuItemStyles: MenuItemStyles = {
+  button: ({ level, active, disabled }) => ({
+    color: disabled ? '#9fb6cf' : level === 0 ? '#0d3b66' : '#3f7cac',
+    backgroundColor: active ? '#cfe7ff' : undefined,
+    '&:hover': { backgroundColor: '#e9f4ff' },
+  }),
+  icon: { color: '#0098e5' },
+  label: { fontWeight: 500 },
+};
+
+<Menu menuItemStyles={menuItemStyles}>…</Menu>;
+```
+
+### `renderExpandIcon`
+
+Render a custom expand icon for `SubMenu` triggers.
+
+- **Type:** `(params: { level, collapsed, disabled, active, open }) => ReactNode`
+- **Default:** `–`
+
+```jsx
+<Menu
+  renderExpandIcon={({ open }) => (
+    <span style={{ transform: open ? 'rotate(90deg)' : 'none' }}>›</span>
+  )}
+>
+  …
+</Menu>
+```
+
+### `transitionDuration`
+
+Duration in milliseconds for the slide-open animation of inline (non-popper) submenus.
+
+- **Type:** `number`
+- **Default:** `300`
+
+```jsx
+<Menu transitionDuration={500}>…</Menu>
+```
+
+### `rootStyles`
+
+Emotion `CSSObject` applied to the Menu's root `<nav>` element.
+
+- **Type:** `CSSObject`
+- **Default:** `–`
+
+```jsx
+<Menu rootStyles={{ marginTop: 16, padding: '0 8px' }}>…</Menu>
+```
+
+## All props
+
+| Name | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `closeOnClick` | `boolean` | `false` | Close the popper on MenuItem click (collapsed sidebar only) |
+| `popover` | `boolean` | `false` | **v2.** Top-level SubMenus open as floating poppers even when expanded |
+| `accordion` | `boolean` | `false` | **v2.** Only one top-level SubMenu can be open at a time |
+| `menuItemStyles` | `MenuItemStyles` | – | Style slots applied to MenuItem / SubMenu and children |
+| `renderExpandIcon` | `(params) => ReactNode` | – | Custom render for the SubMenu expand icon |
+| `transitionDuration` | `number` | `300` | Duration for the slide-open transition |
+| `rootStyles` | `CSSObject` | – | Styles applied to the Menu root element |

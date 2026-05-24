@@ -1,0 +1,90 @@
+---
+title: Dashboard Layout
+description: A common dashboard layout with collapsible sidebar, top header, and content grid.
+---
+
+import { DashboardExample } from '../../../components/demos';
+
+# Dashboard Layout
+
+A typical dashboard layout uses a collapsible sidebar with icons, a fixed header with a
+hamburger toggle and user info, and a content area below. Toggle the sidebar with the
+hamburger button.
+
+<DashboardExample />
+
+## Code
+
+```jsx
+import React from 'react';
+import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
+import { Diamond, BarChart, Global, Calendar, Book } from './icons';
+
+export default function Dashboard() {
+  const [collapsed, setCollapsed] = React.useState(false);
+
+  return (
+    <div style={{ display: 'flex', height: '100vh' }}>
+      <Sidebar
+        collapsed={collapsed}
+        backgroundColor="#1f2937"
+        rootStyles={{ color: '#cbd5e1', border: 'none' }}
+      >
+        <Menu
+          menuItemStyles={{
+            button: ({ active }) => ({
+              color: active ? '#fff' : '#cbd5e1',
+              backgroundColor: active ? '#0098e5' : undefined,
+              '&:hover': { backgroundColor: '#374151', color: '#fff' },
+            }),
+            icon: { color: '#9ca3af' },
+          }}
+        >
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid #374151' }}>
+            <div style={{ fontWeight: 700, fontSize: 18 }}>
+              {collapsed ? 'D' : 'Dashboard'}
+            </div>
+          </div>
+          <MenuItem icon={<Diamond />} active>
+            Overview
+          </MenuItem>
+          <MenuItem icon={<BarChart />}>Analytics</MenuItem>
+          <SubMenu label="E-commerce" icon={<Global />}>
+            <MenuItem>Products</MenuItem>
+            <MenuItem>Orders</MenuItem>
+            <MenuItem>Customers</MenuItem>
+          </SubMenu>
+          <MenuItem icon={<Calendar />}>Calendar</MenuItem>
+          <MenuItem icon={<Book />}>Documentation</MenuItem>
+        </Menu>
+      </Sidebar>
+
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <header
+          style={{
+            padding: '12px 24px',
+            borderBottom: '1px solid #e5e7eb',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <button onClick={() => setCollapsed((c) => !c)}>☰</button>
+          <strong>Overview</strong>
+          <span>user@example.com</span>
+        </header>
+        {/* …content… */}
+      </main>
+    </div>
+  );
+}
+```
+
+## Notes
+
+- The collapsed state is owned by the parent component and passed to `Sidebar` as the
+  controlled `collapsed` prop.
+- `menuItemStyles.button` is a function of `{ active }` so the active item gets a
+  different color without manually tracking selected state in your render.
+- For mobile responsiveness, add a `breakPoint` and pair `toggled` + `onBackdropClick`
+  (see the [Sidebar reference](/docs/components/sidebar) for the overlay pattern).

@@ -1,0 +1,111 @@
+---
+title: Accessibility
+description: Keyboard navigation, ARIA attributes, and screen-reader behavior in react-pro-sidebar.
+---
+
+# Accessibility
+
+`react-pro-sidebar` ships with accessibility wired up out of the box. This page documents
+what is automatic, what behaviors are added on top of the native semantics, and what's
+left to you when integrating with your own routing/state.
+
+## Semantic structure
+
+- `Sidebar` renders as an `<aside>` element.
+- `Menu` renders as a `<nav>` containing a `<ul>` (`<menu>` element internally).
+- `MenuItem` and `SubMenu` render as `<li>` with an inner `<a>` (or any element supplied
+  via the `component` prop) acting as the interactive trigger.
+
+This means screen readers announce the sidebar region, navigation landmark, and list
+structure correctly without further configuration.
+
+## Keyboard navigation
+
+| Key | When | Behavior |
+| --- | ---- | -------- |
+| `Tab` / `Shift+Tab` | Anywhere | Moves focus between interactive triggers (MenuItem / SubMenu / backdrop button) |
+| `Enter` | Focused SubMenu trigger | Toggles the submenu open/closed |
+| `Enter` | Focused MenuItem | Activates the item (follows the link / fires `onClick`) |
+| `Enter` / `Space` | Focused backdrop (overlay mode) | Closes the overlay sidebar |
+| `Escape` | Anywhere, while overlay sidebar is open (`broken + toggled`) | Closes the overlay sidebar |
+
+### Focus management
+
+When the sidebar opens as an overlay (`broken && toggled`), focus is moved into the
+sidebar so keyboard users land inside the navigation region rather than on the backdrop.
+
+### Closed submenus are inert
+
+Items inside a closed `SubMenu` are not reachable via Tab and are not exposed to screen
+readers — the closed content is marked with the `inert` attribute. This prevents
+"hidden" focus traps and keeps assistive-tech navigation linear.
+
+## ARIA attributes
+
+### MenuItem
+
+| Attribute | When |
+| --------- | ---- |
+| `aria-current="page"` | When `active` is `true` |
+| `aria-disabled` | When `disabled` is `true` |
+
+### SubMenu
+
+| Attribute | When |
+| --------- | ---- |
+| `role="button"` | Always (so `aria-expanded` is valid on the trigger) |
+| `aria-expanded` | Reflects the current open state |
+| `aria-haspopup="menu"` | When a top-level submenu is rendered as a popup (collapsed sidebar or `popover` mode) |
+| `aria-disabled` | When `disabled` is `true` |
+
+### Sidebar (overlay mode)
+
+The backdrop is rendered as `role="button"` with `aria-label="backdrop"`, is focusable
+(`tabIndex={0}`), and activates on Enter / Space only — `onKeyPress` (which fires on any
+key) was replaced by an explicit `onKeyDown` handler that checks the key.
+
+## Routing integrations
+
+When you wire `MenuItem` to a router via the `component` prop (e.g.
+`<MenuItem component={<NavLink to="/x" />}>`), the router decides when the active class
+is applied. Pass `active` explicitly when you know an item is selected so that
+`aria-current="page"` is set:
+
+```jsx
+<MenuItem component={<NavLink to="/dashboard" />} active={pathname === '/dashboard'}>
+  Dashboard
+</MenuItem>
+```
+
+## Color contrast
+
+The default theme uses neutral colors that meet WCAG AA contrast in both light and dark
+contexts, but when you customize colors via `menuItemStyles` / `rootStyles`, **verify
+contrast** between text and background — especially for hover, active, and disabled
+states.
+
+## Testing
+
+The package is exercised against `axe-core` in its own test suite (see
+`vitest-axe` in the devDependencies). When testing your own integrations, the same
+approach works well:
+
+```ts
+import { axe } from 'vitest-axe';
+
+test('sidebar has no axe violations', async () => {
+  const { container } = render(<MySidebar />);
+  expect(await axe(container)).toHaveNoViolations();
+});
+```
+
+## Known limitations
+
+- The package follows the "list of links" navigation pattern, not the WAI-ARIA `menu`
+  pattern (which expects a single roving tabindex and arrow-key navigation between
+  items). If your app needs strict menu-pattern semantics (e.g. for a context menu
+  rather than a sidebar), wrap items in your own keyboard handler.
+- `popover` mode opens top-level submenus as floating poppers, but the floating panel is
+  positioned via Popper.js and is not constrained to the sidebar's accessible name
+  region — if you rely on landmark navigation, expanded poppers will be reached in DOM
+  order.
