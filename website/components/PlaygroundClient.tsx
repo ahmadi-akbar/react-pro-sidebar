@@ -7,7 +7,15 @@ import {
   menuClasses,
   type MenuItemStyles,
 } from 'react-pro-sidebar';
-import { Switch, Badge, Typography, SidebarHeader, SidebarFooter } from './playground/ui';
+import {
+  Switch,
+  Select,
+  Slider,
+  Badge,
+  Typography,
+  SidebarHeader,
+  SidebarFooter,
+} from './playground/ui';
 import {
   Diamond,
   BarChart,
@@ -20,6 +28,7 @@ import {
 } from './playground/icons';
 
 type Theme = 'light' | 'dark';
+type BreakPoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'all' | 'none';
 
 const themes = {
   light: {
@@ -86,11 +95,26 @@ const strings = {
     heroTitle: 'Interactive Playground',
     heroSubtitle:
       'Try React Pro Sidebar in real time. Flip the controls below to see each prop in action.',
-    ctrlCollapse: 'Collapse',
+    state: 'State',
+    behavior: 'Behavior',
+    appearance: 'Appearance',
+    sizing: 'Sizing & timing',
+    ctrlCollapse: 'Collapsed',
     ctrlRtl: 'RTL',
     ctrlDarkTheme: 'Dark theme',
     ctrlBackgroundImage: 'Background image',
-    ctrlPopover: 'Popover mode',
+    ctrlPopover: 'Popover',
+    ctrlAccordion: 'Accordion',
+    ctrlCloseOnClick: 'Close on click',
+    ctrlWidth: 'Width',
+    ctrlCollapsedWidth: 'Collapsed width',
+    ctrlBreakPoint: 'Breakpoint',
+    ctrlTransitionDuration: 'Transition duration',
+    breakPointNone: 'none',
+    breakPointAll: 'all',
+    statusBroken: 'Broken',
+    statusExpanded: 'Expanded',
+    statusCollapsed: 'Collapsed',
   },
   ar: {
     sectionGeneral: 'عام',
@@ -126,22 +150,102 @@ const strings = {
     heroTitle: 'ساحة تفاعلية',
     heroSubtitle:
       'جرّب React Pro Sidebar مباشرة. غيّر الإعدادات أدناه لمشاهدة كل خاصية أثناء العمل.',
-    ctrlCollapse: 'طيّ الشريط',
+    state: 'الحالة',
+    behavior: 'السلوك',
+    appearance: 'المظهر',
+    sizing: 'الأبعاد والمؤقتات',
+    ctrlCollapse: 'مطوي',
     ctrlRtl: 'اتجاه RTL',
     ctrlDarkTheme: 'السمة الداكنة',
     ctrlBackgroundImage: 'صورة الخلفية',
-    ctrlPopover: 'وضع النافذة المنبثقة',
+    ctrlPopover: 'وضع منبثق',
+    ctrlAccordion: 'أكورديون',
+    ctrlCloseOnClick: 'إغلاق عند النقر',
+    ctrlWidth: 'العرض',
+    ctrlCollapsedWidth: 'عرض الحالة المطوية',
+    ctrlBreakPoint: 'نقطة التوقف',
+    ctrlTransitionDuration: 'مدة الانتقال',
+    breakPointNone: 'بدون',
+    breakPointAll: 'الكل',
+    statusBroken: 'مكسور',
+    statusExpanded: 'موسّع',
+    statusCollapsed: 'مطوي',
   },
 };
 
+/* ---------- Reusable layout primitives ---------- */
+
+const ControlGroup: React.FC<{ title: string; children: React.ReactNode }> = ({
+  title,
+  children,
+}) => (
+  <section
+    style={{
+      background: 'rgba(127,127,127,0.05)',
+      border: '1px solid rgba(127,127,127,0.15)',
+      borderRadius: 10,
+      padding: '14px 16px',
+    }}
+  >
+    <h3
+      style={{
+        margin: '0 0 12px',
+        fontSize: 11,
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '0.06em',
+        opacity: 0.6,
+      }}
+    >
+      {title}
+    </h3>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>{children}</div>
+  </section>
+);
+
+const StatusPill: React.FC<{ label: string; active?: boolean }> = ({ label, active }) => (
+  <span
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 6,
+      padding: '4px 10px',
+      borderRadius: 999,
+      fontSize: 12,
+      fontWeight: 500,
+      background: active ? 'rgba(0,152,229,0.12)' : 'rgba(127,127,127,0.1)',
+      color: active ? '#0098e5' : 'inherit',
+      border: `1px solid ${active ? 'rgba(0,152,229,0.3)' : 'rgba(127,127,127,0.2)'}`,
+    }}
+  >
+    <span
+      style={{
+        width: 6,
+        height: 6,
+        borderRadius: '50%',
+        background: active ? '#0098e5' : 'currentColor',
+        opacity: active ? 1 : 0.4,
+      }}
+    />
+    {label}
+  </span>
+);
+
 export default function PlaygroundClient() {
+  /* ---------- State ---------- */
   const [collapsed, setCollapsed] = React.useState(false);
   const [toggled, setToggled] = React.useState(false);
   const [broken, setBroken] = React.useState(false);
   const [rtl, setRtl] = React.useState(false);
   const [hasImage, setHasImage] = React.useState(false);
   const [popover, setPopover] = React.useState(false);
+  const [accordion, setAccordion] = React.useState(false);
+  const [closeOnClick, setCloseOnClick] = React.useState(false);
   const [theme, setTheme] = React.useState<Theme>('light');
+  const [width, setWidth] = React.useState(250);
+  const [collapsedWidth, setCollapsedWidth] = React.useState(80);
+  const [breakPoint, setBreakPoint] = React.useState<BreakPoint>('md');
+  const [transitionDuration, setTransitionDuration] = React.useState(300);
 
   const t = rtl ? strings.ar : strings.en;
 
@@ -168,6 +272,17 @@ export default function PlaygroundClient() {
     label: ({ open }) => ({ fontWeight: open ? 600 : undefined }),
   };
 
+  const breakPointOptions = [
+    { value: 'none', label: t.breakPointNone },
+    { value: 'xs', label: 'xs (480px)' },
+    { value: 'sm', label: 'sm (576px)' },
+    { value: 'md', label: 'md (768px)' },
+    { value: 'lg', label: 'lg (992px)' },
+    { value: 'xl', label: 'xl (1200px)' },
+    { value: 'xxl', label: 'xxl (1600px)' },
+    { value: 'all', label: t.breakPointAll },
+  ];
+
   return (
     <div
       lang={rtl ? 'ar' : 'en'}
@@ -175,6 +290,8 @@ export default function PlaygroundClient() {
         display: 'flex',
         height: '100vh',
         direction: rtl ? 'rtl' : 'ltr',
+        background: theme === 'dark' ? '#0a1d33' : '#f7fafc',
+        color: theme === 'dark' ? '#cbd5e1' : '#1f2937',
       }}
     >
       <Sidebar
@@ -182,9 +299,16 @@ export default function PlaygroundClient() {
         toggled={toggled}
         onBackdropClick={() => setToggled(false)}
         onBreakPoint={setBroken}
-        image="https://user-images.githubusercontent.com/25878302/144499035-2911184c-76d3-4611-86e7-bc4e8ff84ff5.jpg"
+        image={
+          hasImage
+            ? 'https://user-images.githubusercontent.com/25878302/144499035-2911184c-76d3-4611-86e7-bc4e8ff84ff5.jpg'
+            : undefined
+        }
         rtl={rtl}
-        breakPoint="md"
+        breakPoint={breakPoint === 'none' ? undefined : breakPoint}
+        width={`${width}px`}
+        collapsedWidth={`${collapsedWidth}px`}
+        transitionDuration={transitionDuration}
         backgroundColor={hexToRgba(themes[theme].sidebar.backgroundColor, hasImage ? 0.9 : 1)}
         rootStyles={{ color: themes[theme].sidebar.color }}
       >
@@ -200,7 +324,12 @@ export default function PlaygroundClient() {
                 {t.sectionGeneral}
               </Typography>
             </div>
-            <Menu menuItemStyles={menuItemStyles} popover={popover}>
+            <Menu
+              menuItemStyles={menuItemStyles}
+              popover={popover}
+              accordion={accordion}
+              closeOnClick={closeOnClick}
+            >
               <SubMenu
                 label={t.charts}
                 icon={<BarChart />}
@@ -251,7 +380,12 @@ export default function PlaygroundClient() {
               </Typography>
             </div>
 
-            <Menu menuItemStyles={menuItemStyles} popover={popover}>
+            <Menu
+              menuItemStyles={menuItemStyles}
+              popover={popover}
+              accordion={accordion}
+              closeOnClick={closeOnClick}
+            >
               <MenuItem icon={<Calendar />} suffix={<Badge variant="success">{t.badgeNew}</Badge>}>
                 {t.calendar}
               </MenuItem>
@@ -266,64 +400,162 @@ export default function PlaygroundClient() {
       </Sidebar>
 
       <main style={{ flex: 1, overflow: 'auto' }}>
-        <div style={{ padding: '16px 24px' }}>
-          <div style={{ marginBottom: 16 }}>
+        <div style={{ maxWidth: 880, margin: '0 auto', padding: '32px 28px 48px' }}>
+          {/* Hero */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              gap: 16,
+              marginBottom: 24,
+              flexWrap: 'wrap',
+            }}
+          >
+            <div>
+              <Typography variant="h4" fontWeight={700}>
+                {t.heroTitle}
+              </Typography>
+              <Typography variant="body2" style={{ opacity: 0.7, marginTop: 8, maxWidth: 540 }}>
+                {t.heroSubtitle}
+              </Typography>
+            </div>
             {broken && (
               <button
                 onClick={() => setToggled(!toggled)}
                 style={{
                   padding: '8px 16px',
-                  borderRadius: 6,
-                  border: '1px solid #cbd5e1',
-                  background: '#fff',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #0098e5 0%, #59d0ff 100%)',
+                  color: '#fff',
                   cursor: 'pointer',
                   fontSize: 14,
+                  fontWeight: 600,
+                  boxShadow: '0 4px 14px rgba(0,152,229,0.3)',
                 }}
               >
                 {t.toggle}
               </button>
             )}
           </div>
-          <div style={{ marginBottom: 32 }}>
-            <Typography variant="h4" fontWeight={700}>
-              {t.heroTitle}
-            </Typography>
-            <Typography variant="body2" style={{ opacity: 0.75, marginTop: 8 }}>
-              {t.heroSubtitle}
-            </Typography>
+
+          {/* Live status row */}
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+              marginBottom: 28,
+            }}
+          >
+            <StatusPill label={collapsed ? t.statusCollapsed : t.statusExpanded} active />
+            {rtl && <StatusPill label="RTL" active />}
+            {theme === 'dark' && <StatusPill label={t.dark} active />}
+            {broken && <StatusPill label={t.statusBroken} active />}
+            {popover && <StatusPill label={t.ctrlPopover} active />}
+            {accordion && <StatusPill label={t.ctrlAccordion} active />}
+            {hasImage && <StatusPill label={t.ctrlBackgroundImage} active />}
           </div>
 
-          <div style={{ display: 'grid', gap: 16, maxWidth: 320 }}>
-            <Switch
-              id="collapse"
-              checked={collapsed}
-              onChange={() => setCollapsed(!collapsed)}
-              label={t.ctrlCollapse}
-            />
-            <Switch
-              id="rtl"
-              checked={rtl}
-              onChange={(e) => setRtl(e.target.checked)}
-              label={t.ctrlRtl}
-            />
-            <Switch
-              id="theme"
-              checked={theme === 'dark'}
-              onChange={(e) => setTheme(e.target.checked ? 'dark' : 'light')}
-              label={t.ctrlDarkTheme}
-            />
-            <Switch
-              id="image"
-              checked={hasImage}
-              onChange={(e) => setHasImage(e.target.checked)}
-              label={t.ctrlBackgroundImage}
-            />
-            <Switch
-              id="popover"
-              checked={popover}
-              onChange={() => setPopover(!popover)}
-              label={t.ctrlPopover}
-            />
+          {/* Controls — grouped */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gap: 14,
+            }}
+          >
+            <ControlGroup title={t.state}>
+              <Switch
+                id="collapse"
+                checked={collapsed}
+                onChange={() => setCollapsed(!collapsed)}
+                label={t.ctrlCollapse}
+              />
+              <Switch
+                id="rtl"
+                checked={rtl}
+                onChange={(e) => setRtl(e.target.checked)}
+                label={t.ctrlRtl}
+              />
+            </ControlGroup>
+
+            <ControlGroup title={t.behavior}>
+              <Switch
+                id="popover"
+                checked={popover}
+                onChange={() => setPopover(!popover)}
+                label={t.ctrlPopover}
+              />
+              <Switch
+                id="accordion"
+                checked={accordion}
+                onChange={() => setAccordion(!accordion)}
+                label={t.ctrlAccordion}
+              />
+              <Switch
+                id="close-on-click"
+                checked={closeOnClick}
+                onChange={() => setCloseOnClick(!closeOnClick)}
+                label={t.ctrlCloseOnClick}
+              />
+            </ControlGroup>
+
+            <ControlGroup title={t.appearance}>
+              <Switch
+                id="theme"
+                checked={theme === 'dark'}
+                onChange={(e) => setTheme(e.target.checked ? 'dark' : 'light')}
+                label={t.ctrlDarkTheme}
+              />
+              <Switch
+                id="image"
+                checked={hasImage}
+                onChange={(e) => setHasImage(e.target.checked)}
+                label={t.ctrlBackgroundImage}
+              />
+            </ControlGroup>
+
+            <ControlGroup title={t.sizing}>
+              <Slider
+                id="width"
+                value={width}
+                min={180}
+                max={400}
+                step={10}
+                onChange={setWidth}
+                label={t.ctrlWidth}
+                unit="px"
+              />
+              <Slider
+                id="collapsed-width"
+                value={collapsedWidth}
+                min={40}
+                max={150}
+                step={5}
+                onChange={setCollapsedWidth}
+                label={t.ctrlCollapsedWidth}
+                unit="px"
+              />
+              <Slider
+                id="transition-duration"
+                value={transitionDuration}
+                min={0}
+                max={1500}
+                step={50}
+                onChange={setTransitionDuration}
+                label={t.ctrlTransitionDuration}
+                unit="ms"
+              />
+              <Select
+                id="breakpoint"
+                value={breakPoint}
+                onChange={(e) => setBreakPoint(e.target.value as BreakPoint)}
+                label={t.ctrlBreakPoint}
+                options={breakPointOptions}
+              />
+            </ControlGroup>
           </div>
         </div>
       </main>
