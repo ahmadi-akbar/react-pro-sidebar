@@ -1,8 +1,8 @@
 import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { Playground as PlaygroundComponent } from '../Playground';
 
-const StoryParams: ComponentMeta<typeof PlaygroundComponent> = {
+const StoryParams: Meta<typeof PlaygroundComponent> = {
   title: 'Playground',
   component: PlaygroundComponent,
   subcomponents: {},
@@ -11,4 +11,4 @@ const StoryParams: ComponentMeta<typeof PlaygroundComponent> = {
 
 export default StoryParams;
 
-export const Playground: ComponentStory<typeof PlaygroundComponent> = () => <PlaygroundComponent />;
+export const Playground: StoryFn<typeof PlaygroundComponent> = () => <PlaygroundComponent />;

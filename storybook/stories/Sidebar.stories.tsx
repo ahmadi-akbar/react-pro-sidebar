@@ -1,8 +1,8 @@
 import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { Menu, MenuItem, Sidebar } from '../../src';
 
-const StoryParams: ComponentMeta<typeof Sidebar> = {
+const StoryParams: Meta<typeof Sidebar> = {
   title: 'Sidebar',
   component: Sidebar,
   subcomponents: {},
@@ -11,7 +11,7 @@ const StoryParams: ComponentMeta<typeof Sidebar> = {
 
 export default StoryParams;
 
-export const Basic: ComponentStory<typeof Sidebar> = ({ ...props }) => (
+export const Basic: StoryFn<typeof Sidebar> = ({ ...props }) => (
   <div style={{ display: 'flex', height: '100%', minHeight: '400px' }}>
     <Sidebar {...props}>
       <Menu>
@@ -47,7 +47,7 @@ Basic.parameters = {
   },
 };
 
-export const Width: ComponentStory<typeof Sidebar> = () => (
+export const Width: StoryFn<typeof Sidebar> = () => (
   <div style={{ display: 'flex', height: '100%', minHeight: '400px' }}>
     <Sidebar width="300px">
       <Menu>
@@ -62,7 +62,7 @@ export const Width: ComponentStory<typeof Sidebar> = () => (
 
 Width.storyName = 'width';
 
-export const Collapsed: ComponentStory<typeof Sidebar> = () => {
+export const Collapsed: StoryFn<typeof Sidebar> = () => {
   const [collapsed, setCollapsed] = React.useState(false);
 
   return (
@@ -87,7 +87,7 @@ export const Collapsed: ComponentStory<typeof Sidebar> = () => {
 };
 Collapsed.storyName = 'collapsed';
 
-export const CollapsedWidth: ComponentStory<typeof Sidebar> = () => (
+export const CollapsedWidth: StoryFn<typeof Sidebar> = () => (
   <div style={{ display: 'flex', height: '100%', minHeight: '400px' }}>
     <Sidebar collapsed collapsedWidth="60px">
       <Menu>
@@ -101,12 +101,12 @@ export const CollapsedWidth: ComponentStory<typeof Sidebar> = () => (
 );
 CollapsedWidth.storyName = 'collapsedWidth';
 
-export const Toggled: ComponentStory<typeof Sidebar> = () => {
+export const Toggled: StoryFn<typeof Sidebar> = () => {
   const [toggled, setToggled] = React.useState(false);
 
   return (
     <div style={{ display: 'flex', height: '100%', minHeight: '400px' }}>
-      <Sidebar onBackdropClick={() => setToggled(false)} toggled={toggled} breakPoint="always">
+      <Sidebar onBackdropClick={() => setToggled(false)} toggled={toggled} breakPoint="all">
         <Menu>
           <MenuItem> Documentation</MenuItem>
           <MenuItem> Calendar</MenuItem>
@@ -126,7 +126,7 @@ export const Toggled: ComponentStory<typeof Sidebar> = () => {
 };
 Toggled.storyName = 'toggled';
 
-export const BackgroundColor: ComponentStory<typeof Sidebar> = () => (
+export const BackgroundColor: StoryFn<typeof Sidebar> = () => (
   <div style={{ display: 'flex', height: '100%', minHeight: '400px' }}>
     <Sidebar backgroundColor="#bcf3ff">
       <Menu>
@@ -140,7 +140,7 @@ export const BackgroundColor: ComponentStory<typeof Sidebar> = () => (
 );
 BackgroundColor.storyName = 'backgroundColor';
 
-export const Image: ComponentStory<typeof Sidebar> = () => (
+export const Image: StoryFn<typeof Sidebar> = () => (
   <div style={{ display: 'flex', height: '100%', minHeight: '400px' }}>
     <Sidebar image="https://i.pinimg.com/736x/8e/6c/06/8e6c064f57f94838263d7ba9ad80f353.jpg">
       <Menu>
@@ -154,12 +154,12 @@ export const Image: ComponentStory<typeof Sidebar> = () => (
 );
 Image.storyName = 'image';
 
-export const BreakPoint: ComponentStory<typeof Sidebar> = () => {
+export const BreakPoint: StoryFn<typeof Sidebar> = () => {
   const [toggled, setToggled] = React.useState(false);
 
   return (
     <div style={{ display: 'flex', height: '100%', minHeight: '400px' }}>
-      <Sidebar onBackdropClick={() => setToggled(false)} toggled={toggled} breakPoint="always">
+      <Sidebar onBackdropClick={() => setToggled(false)} toggled={toggled} breakPoint="all">
         <Menu>
           <MenuItem> Documentation</MenuItem>
           <MenuItem> Calendar</MenuItem>
@@ -186,13 +186,13 @@ BreakPoint.parameters = {
   },
 };
 
-export const CustomBreakPoint: ComponentStory<typeof Sidebar> = () => {
+export const CustomBreakPoint: StoryFn<typeof Sidebar> = () => {
   const [toggled, setToggled] = React.useState(false);
   const [broken, setBroken] = React.useState(window.matchMedia('(max-width: 800px)').matches);
 
   return (
     <div style={{ display: 'flex', height: '100%', minHeight: '400px' }}>
-      <Sidebar toggled={toggled} customBreakPoint="800px" onBreakPoint={setBroken}>
+      <Sidebar toggled={toggled} breakPoint="800px" onBreakPoint={setBroken}>
         <Menu>
           <MenuItem> Documentation</MenuItem>
           <MenuItem> Calendar</MenuItem>
@@ -212,7 +212,7 @@ export const CustomBreakPoint: ComponentStory<typeof Sidebar> = () => {
     </div>
   );
 };
-CustomBreakPoint.storyName = 'customBreakPoint';
+CustomBreakPoint.storyName = 'custom breakpoint value';
 
 BreakPoint.parameters = {
   docs: {
@@ -221,7 +221,7 @@ BreakPoint.parameters = {
   },
 };
 
-export const TransitionDuration: ComponentStory<typeof Sidebar> = () => {
+export const TransitionDuration: StoryFn<typeof Sidebar> = () => {
   const [collapsed, setCollapsed] = React.useState(false);
 
   return (
@@ -246,7 +246,7 @@ export const TransitionDuration: ComponentStory<typeof Sidebar> = () => {
 };
 TransitionDuration.storyName = 'transitionDuration';
 
-export const RTL: ComponentStory<typeof Sidebar> = () => {
+export const RTL: StoryFn<typeof Sidebar> = () => {
   return (
     <div
       style={{
@@ -269,7 +269,7 @@ export const RTL: ComponentStory<typeof Sidebar> = () => {
 };
 RTL.storyName = 'rtl';
 
-export const RootStyles: ComponentStory<typeof Sidebar> = () => {
+export const RootStyles: StoryFn<typeof Sidebar> = () => {
   return (
     <div
       style={{

@@ -1,0 +1,115 @@
+---
+title: Next.js Integration
+description: Using react-pro-sidebar in a Next.js app with the App Router or Pages Router.
+---
+
+import { NextJsExample } from '../../../components/demos';
+
+# Next.js Integration
+
+`react-pro-sidebar` is a fully client-side component (it uses `@emotion/styled` and
+needs the browser for the resize observer). In Next.js, render it from a client
+component and use Next's `Link` for navigation.
+
+<NextJsExample />
+
+## App Router (Next.js 13+)
+
+Create a client component for the sidebar (the `'use client'` directive is required):
+
+```tsx
+// app/(dashboard)/sidebar.tsx
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
+
+const items = [
+  { href: '/', label: 'Home' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/products', label: 'Products' },
+];
+
+export default function AppSidebar() {
+  const pathname = usePathname();
+  return (
+    <Sidebar>
+      <Menu>
+        {items.map((item) => (
+          <MenuItem
+            key={item.href}
+            component={<Link href={item.href} />}
+            active={pathname === item.href}
+          >
+            {item.label}
+          </MenuItem>
+        ))}
+      </Menu>
+    </Sidebar>
+  );
+}
+```
+
+Use it in your layout:
+
+```tsx
+// app/(dashboard)/layout.tsx
+import AppSidebar from './sidebar';
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', height: '100vh' }}>
+      <AppSidebar />
+      <main style={{ flex: 1 }}>{children}</main>
+    </div>
+  );
+}
+```
+
+## Pages Router
+
+Same pattern, but read the current route from `next/router`:
+
+```tsx
+// components/AppSidebar.tsx
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
+
+export default function AppSidebar() {
+  const { pathname } = useRouter();
+  return (
+    <Sidebar>
+      <Menu>
+        <MenuItem component={<Link href="/" />} active={pathname === '/'}>
+          Home
+        </MenuItem>
+        <MenuItem component={<Link href="/blog" />} active={pathname === '/blog'}>
+          Blog
+        </MenuItem>
+      </Menu>
+    </Sidebar>
+  );
+}
+```
+
+## SSR / hydration tips
+
+- The sidebar's collapse / overlay state depends on `window.matchMedia`, which is not
+  available during server rendering. The component handles this safely — the broken
+  state defaults to `false` on the server and updates on mount.
+- If you see hydration warnings related to `@emotion/styled` class names, ensure you
+  have a single React tree (e.g. don't import the package into both server and client
+  components separately).
+- For a fully client-only sidebar, wrap it in `next/dynamic` with `ssr: false`:
+
+```tsx
+import dynamic from 'next/dynamic';
+const AppSidebar = dynamic(() => import('./AppSidebar'), { ssr: false });
+```
+
+## See also
+
+- [React Router integration](/docs/examples/react-router) — same `component` pattern
+- [Dashboard layout](/docs/examples/dashboard-layout) — header + collapsible sidebar

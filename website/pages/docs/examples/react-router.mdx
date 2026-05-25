@@ -1,0 +1,85 @@
+---
+title: React Router Integration
+description: Using react-pro-sidebar with react-router-dom NavLink for active-route styling.
+---
+
+import { ReactRouterExample } from '../../../components/demos';
+
+# React Router Integration
+
+`react-pro-sidebar` doesn't ship a router — instead, pass any router link element to
+`MenuItem`'s `component` prop and the menu item renders as that element while keeping
+its sidebar styling.
+
+The demo below uses a fake NavLink (since this docs site doesn't bundle React Router)
+that mirrors the same `.active` class pattern.
+
+<ReactRouterExample />
+
+## Code
+
+```jsx
+import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
+import { NavLink } from 'react-router-dom';
+
+export default function AppSidebar() {
+  return (
+    <Sidebar>
+      <Menu
+        menuItemStyles={{
+          button: {
+            // NavLink adds the `active` class on the matched route — use it as
+            // a selector to style the active menu item.
+            [`&.active`]: {
+              backgroundColor: '#cfe7ff',
+              color: '#0d3b66',
+            },
+            '&:hover': { backgroundColor: '#e9f4ff' },
+          },
+        }}
+      >
+        <MenuItem component={<NavLink to="/dashboard" />}>Dashboard</MenuItem>
+        <MenuItem component={<NavLink to="/reports" />}>Reports</MenuItem>
+        <MenuItem component={<NavLink to="/calendar" />}>Calendar</MenuItem>
+      </Menu>
+    </Sidebar>
+  );
+}
+```
+
+## Using `active` for ARIA correctness
+
+While the `.active` class drives the visual state, also pass `active` so that
+`aria-current="page"` is set:
+
+```jsx
+import { useLocation } from 'react-router-dom';
+
+const { pathname } = useLocation();
+
+<MenuItem
+  component={<NavLink to="/dashboard" />}
+  active={pathname === '/dashboard'}
+>
+  Dashboard
+</MenuItem>;
+```
+
+## Using `Link` instead of `NavLink`
+
+If you want full manual control (and skip the `.active` class), use plain `Link`:
+
+```jsx
+import { Link, useLocation } from 'react-router-dom';
+
+const { pathname } = useLocation();
+
+<MenuItem component={<Link to="/dashboard" />} active={pathname === '/dashboard'}>
+  Dashboard
+</MenuItem>;
+```
+
+## See also
+
+- [Next.js integration](/docs/examples/nextjs-integration) — same pattern with `next/link`
+- [Accessibility](/docs/accessibility) — how `aria-current` is wired up

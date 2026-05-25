@@ -1,0 +1,102 @@
+---
+title: Installation
+description: How to install and use react-pro-sidebar.
+---
+
+# Installation
+
+`react-pro-sidebar` provides a set of components for building modern, customizable side
+navigation in React applications.
+
+## Requirements
+
+- **React >= 18** (React 19 is supported)
+- `react` and `react-dom` are peer dependencies
+
+## Install
+
+import { Tabs } from 'nextra/components';
+
+<Tabs items={['npm', 'yarn', 'pnpm', 'bun']}>
+  <Tabs.Tab>
+    ```bash
+    npm install react-pro-sidebar
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    yarn add react-pro-sidebar
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    pnpm add react-pro-sidebar
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    bun add react-pro-sidebar
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## Basic usage
+
+```jsx
+import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
+
+export default function App() {
+  return (
+    <div style={{ display: 'flex', height: '100vh' }}>
+      <Sidebar>
+        <Menu>
+          <MenuItem> Dashboard </MenuItem>
+          <SubMenu label="Charts">
+            <MenuItem> Pie charts </MenuItem>
+            <MenuItem> Line charts </MenuItem>
+          </SubMenu>
+          <MenuItem> Documentation </MenuItem>
+          <MenuItem> Calendar </MenuItem>
+        </Menu>
+      </Sidebar>
+      <main style={{ flex: 1, padding: 16 }}>Hello, world!</main>
+    </div>
+  );
+}
+```
+
+## What's exported
+
+```ts
+import {
+  // Components
+  Sidebar,
+  Menu,
+  MenuItem,
+  SubMenu,
+  // Utility classes
+  sidebarClasses,
+  menuClasses,
+  // Types
+  type SidebarProps,
+  type MenuProps,
+  type MenuItemProps,
+  type SubMenuProps,
+  type MenuItemStyles,
+  type MenuItemStylesParams,
+  type CSSObject,
+} from 'react-pro-sidebar';
+```
+
+## TypeScript
+
+The package ships its own types — no extra `@types` install needed.
+
+## Next steps
+
+- Read through the [Components](/docs/components/sidebar) reference for every prop, with
+  interactive examples.
+- Browse [Examples](/docs/examples/dashboard-layout) for dashboard layouts, React Router
+  integration, and theming.
+- Open the [Playground](/playground) to flip props live in your browser.
+- Coming from v1? See the [Migration Guide](/docs/migration).

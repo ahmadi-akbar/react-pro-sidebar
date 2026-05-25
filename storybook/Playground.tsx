@@ -69,6 +69,7 @@ export const Playground: React.FC = () => {
   const [broken, setBroken] = React.useState(false);
   const [rtl, setRtl] = React.useState(false);
   const [hasImage, setHasImage] = React.useState(false);
+  const [popover, setPopover] = React.useState(false);
   const [theme, setTheme] = React.useState<Theme>('light');
 
   // handle on RTL change event
@@ -147,7 +148,7 @@ export const Playground: React.FC = () => {
                 General
               </Typography>
             </div>
-            <Menu menuItemStyles={menuItemStyles}>
+            <Menu menuItemStyles={menuItemStyles} popover={popover}>
               <SubMenu
                 label="Charts"
                 icon={<BarChart />}
@@ -198,7 +199,7 @@ export const Playground: React.FC = () => {
               </Typography>
             </div>
 
-            <Menu menuItemStyles={menuItemStyles}>
+            <Menu menuItemStyles={menuItemStyles} popover={popover}>
               <MenuItem icon={<Calendar />} suffix={<Badge variant="success">New</Badge>}>
                 Calendar
               </MenuItem>
@@ -257,6 +258,15 @@ export const Playground: React.FC = () => {
 
             <div style={{ marginBottom: 16 }}>
               <Switch id="image" checked={hasImage} onChange={handleImageChange} label="Image" />
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <Switch
+                id="popover"
+                checked={popover}
+                onChange={() => setPopover(!popover)}
+                label="Popover"
+              />
             </div>
           </div>
         </div>

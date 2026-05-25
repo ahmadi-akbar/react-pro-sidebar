@@ -46,7 +46,7 @@ const StyledLogo = styled.div<{ rtl?: boolean }>`
       `}
 `;
 
-export const SidebarHeader: React.FC<SidebarHeaderProps> = ({ children, rtl, ...rest }) => {
+export const SidebarHeader: React.FC<SidebarHeaderProps> = ({ rtl, ...rest }) => {
   return (
     <StyledSidebarHeader {...rest}>
       <div style={{ display: 'flex', alignItems: 'center' }}>

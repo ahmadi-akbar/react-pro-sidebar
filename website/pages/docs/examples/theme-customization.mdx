@@ -1,0 +1,128 @@
+---
+title: Theme Customization
+description: Theme the sidebar with rootStyles and menuItemStyles.
+---
+
+import { ThemeExample } from '../../../components/demos';
+
+# Theme Customization
+
+`react-pro-sidebar` provides two complementary styling primitives:
+
+- **`rootStyles`** — Emotion `CSSObject` applied to each component's root element. Pair
+  it with the exported `sidebarClasses` / `menuClasses` registries to target inner nodes.
+- **`menuItemStyles`** (on `Menu`) — A structured slot system for theming MenuItem and
+  SubMenu and their children: `root`, `button`, `label`, `icon`, `prefix`, `suffix`,
+  `subMenuContent`, `SubMenuExpandIcon`. Each slot accepts a `CSSObject` or a function
+  of the item's state (`{ level, active, disabled, isSubmenu, open }`).
+
+Try the live themes below:
+
+<ThemeExample />
+
+## Code
+
+```jsx
+import { Sidebar, Menu, MenuItem, SubMenu, menuClasses, type MenuItemStyles } from 'react-pro-sidebar';
+
+const themes = {
+  light: { bg: '#ffffff', text: '#0d3b66', icon: '#0098e5', hoverBg: '#cfe7ff', hoverText: '#0d3b66' },
+  dark:  { bg: '#0b2948', text: '#cbd5e1', icon: '#59d0ff', hoverBg: '#00458b', hoverText: '#fff' },
+  brand: { bg: '#1b1035', text: '#e9e1ff', icon: '#c084fc', hoverBg: '#4c1d95', hoverText: '#fff' },
+};
+
+export default function ThemedSidebar({ theme = 'light' }) {
+  const t = themes[theme];
+
+  const menuItemStyles: MenuItemStyles = {
+    button: {
+      color: t.text,
+      [`&.${menuClasses.active}`]: {
+        color: t.hoverText,
+        backgroundColor: t.hoverBg,
+      },
+      '&:hover': {
+        backgroundColor: t.hoverBg,
+        color: t.hoverText,
+      },
+    },
+    icon: { color: t.icon },
+  };
+
+  return (
+    <Sidebar
+      backgroundColor={t.bg}
+      rootStyles={{ color: t.text, border: 'none' }}
+    >
+      <Menu menuItemStyles={menuItemStyles}>
+        <MenuItem active>Dashboard</MenuItem>
+        <SubMenu label="Charts">
+          <MenuItem>Pie</MenuItem>
+          <MenuItem>Line</MenuItem>
+        </SubMenu>
+      </Menu>
+    </Sidebar>
+  );
+}
+```
+
+## Using state callbacks
+
+Each `menuItemStyles` slot can be a function of the item's state — useful when you only
+want to apply rules conditionally:
+
+```jsx
+<Menu
+  menuItemStyles={{
+    button: ({ level, active, disabled }) => {
+      if (level === 0) {
+        return {
+          color: disabled ? '#9fb6cf' : '#0d3b66',
+          backgroundColor: active ? '#cfe7ff' : undefined,
+        };
+      }
+      // Level > 0 styling
+      return { color: '#3f7cac' };
+    },
+  }}
+>
+  …
+</Menu>
+```
+
+## Targeting deep nodes via `rootStyles`
+
+For more advanced overrides, use `rootStyles` together with `sidebarClasses` /
+`menuClasses`:
+
+```jsx
+import { Sidebar, sidebarClasses, menuClasses } from 'react-pro-sidebar';
+
+<Sidebar
+  rootStyles={{
+    [`.${sidebarClasses.container}`]: { boxShadow: '2px 0 8px rgba(0,0,0,0.04)' },
+    [`.${menuClasses.subMenuContent}`]: { paddingLeft: 24 },
+  }}
+>
+  …
+</Sidebar>;
+```
+
+## Dark mode with CSS variables
+
+Define theme variables on your app root and reference them inside `rootStyles` /
+`menuItemStyles`:
+
+```css
+:root { --sb-bg: #fff; --sb-text: #0d3b66; }
+.dark { --sb-bg: #0b2948; --sb-text: #cbd5e1; }
+```
+
+```jsx
+<Sidebar
+  backgroundColor="var(--sb-bg)"
+  rootStyles={{ color: 'var(--sb-text)' }}
+>
+  …
+</Sidebar>
+```

@@ -14,15 +14,20 @@
 [npm-url]: https://www.npmjs.com/package/react-pro-sidebar
 [github-url]: https://github.com/azouaoui-med/react-pro-sidebar
 
-React Pro Sidebar provides a set of components for creating high level and customizable side navigation
+The ultimate sidebar component for React applications. Highly customizable, fully responsive, and effortless to integrate into any dashboard.
+
+## Documentation
+
+Full documentation, guides and live examples are available at **[react-pro-sidebar.netlify.app](https://react-pro-sidebar.netlify.app/)**.
 
 ## Old versions
 
+- [v1.x](https://github.com/azouaoui-med/react-pro-sidebar/tree/v1.x)
 - [v0.x](https://github.com/azouaoui-med/react-pro-sidebar/tree/v0.x)
 
 ## Live Preview
 
-- [Demo](https://azouaoui-med.github.io/react-pro-sidebar/iframe.html?id=playground--playground&args=&viewMode=story)
+- [Playground](https://react-pro-sidebar.netlify.app/playground)
 
 - [Storybook](https://azouaoui-med.github.io/react-pro-sidebar/?path=/docs/sidebar--basic)
 
@@ -43,6 +48,15 @@ yarn add react-pro-sidebar
 ```bash
 npm install react-pro-sidebar
 ```
+
+> **Requirements:** React **>= 18** (React 19 supported). `react` and
+> `react-dom` are peer dependencies.
+
+## Migrating from v1
+
+v2 removes the legacy hook API (`useProSidebar`, `ProSidebarProvider`), the
+`defaultCollapsed` prop and the `breakPoint="always"` value, and requires
+React 18+. See the [migration guide](./MIGRATION.md) for upgrade steps.
 
 ## Usage
 
@@ -69,13 +83,13 @@ You can make use of the `component` prop to integrate [React Router](https://rea
 
 ```jsx
 import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 <Sidebar>
   <Menu
     menuItemStyles={{
       button: {
-        // the active class will be added automatically by react router
+        // NavLink adds the active class automatically,
         // so we can use it to style the active menu item
         [`&.active`]: {
           backgroundColor: '#13395e',
@@ -84,9 +98,9 @@ import { Link } from 'react-router-dom';
       },
     }}
   >
-    <MenuItem component={<Link to="/documentation" />}> Documentation</MenuItem>
-    <MenuItem component={<Link to="/calendar" />}> Calendar</MenuItem>
-    <MenuItem component={<Link to="/e-commerce" />}> E-commerce</MenuItem>
+    <MenuItem component={<NavLink to="/documentation" />}> Documentation</MenuItem>
+    <MenuItem component={<NavLink to="/calendar" />}> Calendar</MenuItem>
+    <MenuItem component={<NavLink to="/e-commerce" />}> E-commerce</MenuItem>
   </Menu>
 </Sidebar>;
 ```
@@ -166,12 +180,6 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
     <tbody>
         <tr>
             <td rowspan=13>Sidebar</td>
-            <td >defaultCollapsed</td>
-            <td><code>boolean</code></td>
-            <td>Initial collapsed status</td>
-            <td><code>false</code></td>
-        </tr>
-        <tr>
             <td>collapsed</td>
             <td><code>boolean</code></td>
             <td>Sidebar collapsed state</td>
@@ -187,7 +195,7 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
             <td>width</td>
             <td><code>number | string</code></td>
             <td>Width of the sidebar</td>
-            <td><code>270px</code></td>
+            <td><code>250px</code></td>
         </tr>
         <tr>
             <td>collapsedWidth</td>
@@ -209,14 +217,8 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
         </tr>
         <tr>
             <td>breakPoint</td>
-            <td><code>xs</code> | <code>sm</code> | <code>md</code> | <code>lg</code> | <code>xl</code> | <code>xxl</code> | <code>all</code></td>
-            <td>Set when the sidebar should trigger responsiveness behavior </td>
-            <td>-</td>
-        </tr>
-        <tr>
-            <td>customBreakPoint</td>
-            <td><code>string</code></td>
-            <td>Set custom breakpoint value, this will override breakPoint prop </td>
+            <td><code>xs</code> | <code>sm</code> | <code>md</code> | <code>lg</code> | <code>xl</code> | <code>xxl</code> | <code>all</code> | <code>string</code></td>
+            <td>Set when the sidebar should trigger responsiveness behavior. Accepts a predefined breakpoint or a custom CSS value (ex: <code>450px</code>)</td>
             <td>-</td>
         </tr>
         <tr>
@@ -243,11 +245,29 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
             <td>Callback function to be called when backdrop is clicked</td>
             <td>-</td>
         </tr>
+        <tr>
+            <td>onBreakPoint</td>
+            <td><code>(broken: boolean) => void</code></td>
+            <td>Callback function to be called when the broken state changes</td>
+            <td>-</td>
+        </tr>
          <tr>
-            <td rowspan=5>Menu</td>
+            <td rowspan=7>Menu</td>
             <td>closeOnClick</td>
             <td><code>boolean</code></td>
             <td>If <code>true</code> and sidebar is in collapsed state, submenu popper will automatically close on MenuItem click</td>
+            <td><code>false</code></td>
+        </tr>
+         <tr>
+            <td>popover</td>
+            <td><code>boolean</code></td>
+            <td>If <code>true</code>, top-level SubMenus open as floating poppers even when the sidebar is expanded (instead of sliding open inline)</td>
+            <td><code>false</code></td>
+        </tr>
+         <tr>
+            <td>accordion</td>
+            <td><code>boolean</code></td>
+            <td>If <code>true</code>, only one top-level SubMenu can be open at a time; opening another closes the previously open one</td>
             <td><code>false</code></td>
         </tr>
          <tr>
@@ -258,7 +278,7 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
         </tr>
          <tr>
             <td>renderExpandIcon</td>
-            <td><code>(params: { level: number; collapsed: boolean; disabled: boolean; active: boolean; open: boolean; }) => React.ReactNode</code></td>
+            <td><code>(params: { level: number; disabled: boolean; active: boolean; open: boolean; }) => React.ReactNode</code></td>
             <td>Render method for customizing submenu expand icon</td>
             <td>-</td>
         </tr>
@@ -318,7 +338,7 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
             <td>-</td>
         </tr>
         <tr>
-            <td rowspan=11>SubMenu</td>
+            <td rowspan=12>SubMenu</td>
             <td>label</td>
             <td><code>string | ReactNode</code></td>
             <td>Label for the submenu </td>
@@ -345,7 +365,7 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
         <tr>
             <td>active</td>
             <td><code>boolean</code></td>
-            <td>If <code>true</code>, the component is active</td>
+            <td>If <code>true</code>, the component is active. Also set automatically when any descendant is active</td>
             <td><code>false</code></td>
         </tr>
          <tr>
@@ -365,6 +385,12 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
             <td><code>ReactNode</code></td>
             <td>Add a suffix to the submenu </td>
             <td>-</td>
+        </tr>
+        <tr>
+            <td>accordion</td>
+            <td><code>boolean</code></td>
+            <td>If <code>true</code>, only one of this submenu's direct child SubMenus can be open at a time</td>
+            <td><code>false</code></td>
         </tr>
         <tr>
             <td>onOpenChange</td>

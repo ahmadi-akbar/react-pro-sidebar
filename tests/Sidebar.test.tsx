@@ -1,5 +1,6 @@
 import React from 'react';
-import { customRender, screen } from './testUtils';
+import { describe, it, expect, vi } from 'vitest';
+import { customRender, screen, fireEvent } from './testUtils';
 import { Sidebar } from '../src/components/Sidebar';
 import * as mediaQueryHook from '../src/hooks/useMediaQuery';
 import { sidebarClasses } from '../src/utils/utilityClasses';
@@ -31,8 +32,8 @@ describe('Sidebar', () => {
     });
   });
 
-  it('should set the width to 80px when defaultCollapsed is true ', () => {
-    customRender(<Sidebar defaultCollapsed>Sidebar</Sidebar>);
+  it('should set the width to 80px when collapsed is true ', () => {
+    customRender(<Sidebar collapsed>Sidebar</Sidebar>);
     const sidebarElem = screen.getByTestId(`${sidebarClasses.root}-test-id`);
     expect(sidebarElem).toHaveClass(sidebarClasses.collapsed);
     expect(sidebarElem).toHaveStyle({
@@ -43,7 +44,7 @@ describe('Sidebar', () => {
 
   it('should have a width of 100px when collapsedWidth is set ', () => {
     customRender(
-      <Sidebar collapsedWidth="100px" defaultCollapsed>
+      <Sidebar collapsedWidth="100px" collapsed>
         Sidebar
       </Sidebar>,
     );
@@ -60,7 +61,7 @@ describe('Sidebar', () => {
     const innerSidebarElem = screen.getByTestId(`${sidebarClasses.container}-test-id`);
 
     expect(innerSidebarElem).toHaveStyle({
-      'background-color': 'black',
+      'background-color': 'rgb(0, 0, 0)',
     });
   });
 
@@ -83,7 +84,7 @@ describe('Sidebar', () => {
   });
 
   it('should sidebar have a correct positioning when broken', () => {
-    jest.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
+    vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
 
     customRender(<Sidebar breakPoint="all">Sidebar</Sidebar>);
 
@@ -98,10 +99,10 @@ describe('Sidebar', () => {
   });
 
   it('should sidebar have a correct positioning when broken and collapsed', () => {
-    jest.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
+    vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
 
     customRender(
-      <Sidebar breakPoint="all" defaultCollapsed>
+      <Sidebar breakPoint="all" collapsed>
         Sidebar
       </Sidebar>,
     );
@@ -114,7 +115,7 @@ describe('Sidebar', () => {
   });
 
   it('should display overlay position sidebar to the left when broken and toggled', () => {
-    jest.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
+    vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
 
     customRender(
       <Sidebar breakPoint="all" toggled>
@@ -131,7 +132,7 @@ describe('Sidebar', () => {
   });
 
   it('should position and hide sidebar to the right when rtl is true and broken', () => {
-    jest.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
+    vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
 
     customRender(
       <Sidebar rtl breakPoint="all">
@@ -146,7 +147,7 @@ describe('Sidebar', () => {
   });
 
   it('should display and position sidebar to the right when rtl is true and broken and toggled', () => {
-    jest.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
+    vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
 
     customRender(
       <Sidebar rtl breakPoint="all" toggled>
@@ -157,6 +158,60 @@ describe('Sidebar', () => {
 
     expect(SidebarElem).toHaveStyle({
       right: '0px',
+    });
+  });
+
+  describe('backdrop', () => {
+    const renderBroken = () => {
+      vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
+      const onBackdropClick = vi.fn();
+      customRender(
+        <Sidebar breakPoint="all" toggled onBackdropClick={onBackdropClick}>
+          Sidebar
+        </Sidebar>,
+      );
+      const backdrop = screen.getByTestId(`${sidebarClasses.backdrop}-test-id`);
+      return { backdrop, onBackdropClick };
+    };
+
+    it('should call onBackdropClick when clicked', () => {
+      const { backdrop, onBackdropClick } = renderBroken();
+      fireEvent.click(backdrop);
+      expect(onBackdropClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call onBackdropClick on Enter and Space keys', () => {
+      const { backdrop, onBackdropClick } = renderBroken();
+      fireEvent.keyDown(backdrop, { key: 'Enter' });
+      fireEvent.keyDown(backdrop, { key: ' ' });
+      expect(onBackdropClick).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not call onBackdropClick on other keys', () => {
+      const { backdrop, onBackdropClick } = renderBroken();
+      fireEvent.keyDown(backdrop, { key: 'a' });
+      fireEvent.keyDown(backdrop, { key: 'Tab' });
+      expect(onBackdropClick).not.toHaveBeenCalled();
+    });
+
+    it('should call onBackdropClick when Escape is pressed', () => {
+      const { onBackdropClick } = renderBroken();
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(onBackdropClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('should move focus to the sidebar when opened as an overlay', () => {
+      const { onBackdropClick } = renderBroken();
+      expect(onBackdropClick).not.toHaveBeenCalled();
+      expect(screen.getByTestId(`${sidebarClasses.root}-test-id`)).toHaveFocus();
+    });
+
+    it('should not close on Escape when not an overlay', () => {
+      const onBackdropClick = vi.fn();
+      vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => false);
+      customRender(<Sidebar onBackdropClick={onBackdropClick}>Sidebar</Sidebar>);
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(onBackdropClick).not.toHaveBeenCalled();
     });
   });
 });

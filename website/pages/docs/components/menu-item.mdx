@@ -1,0 +1,129 @@
+---
+title: MenuItem
+description: A single clickable item inside a Menu — can be rendered as any element via the component prop.
+---
+
+import { ActiveDisabledDemo, PrefixSuffixDemo } from '../../../components/demos';
+
+# MenuItem
+
+`MenuItem` represents a single clickable item inside a `Menu`. It supports icons,
+prefix/suffix slots, an `active` state (with automatic `aria-current="page"`), and can
+be rendered as any element via the `component` prop — making router integrations
+straightforward.
+
+```jsx
+import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
+
+<Sidebar>
+  <Menu>
+    <MenuItem icon={<DashboardIcon />} active>
+      Dashboard
+    </MenuItem>
+  </Menu>
+</Sidebar>;
+```
+
+## Props
+
+### `icon`
+
+Icon node displayed before the label. Typically an inline SVG.
+
+- **Type:** `ReactNode`
+- **Default:** `–`
+
+```jsx
+<MenuItem icon={<DashboardIcon />}>Dashboard</MenuItem>
+```
+
+### `active`
+
+Marks the item as active. Sets `aria-current="page"` and applies the
+`menuClasses.active` class — visible by default and themeable via `menuItemStyles`.
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+<ActiveDisabledDemo />
+
+```jsx
+<MenuItem active>Current page</MenuItem>
+```
+
+### `disabled`
+
+Disables the item. Sets `aria-disabled` and applies the `menuClasses.disabled` class.
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+```jsx
+<MenuItem disabled>Coming soon</MenuItem>
+```
+
+### `prefix`
+
+Node rendered between the icon and the label. Useful for status dots or short tags.
+
+- **Type:** `ReactNode`
+- **Default:** `–`
+
+<PrefixSuffixDemo />
+
+### `suffix`
+
+Node rendered after the label. Common for badges, keyboard shortcuts, or counters.
+
+- **Type:** `ReactNode`
+- **Default:** `–`
+
+```jsx
+<MenuItem suffix={<Badge>New</Badge>}>Calendar</MenuItem>
+```
+
+### `component`
+
+Override the element used for the menu button. Accepts a string tag name (e.g. `'div'`)
+or a React element — handy for routing integrations.
+
+- **Type:** `string | ReactElement`
+- **Default:** `–`
+
+```jsx
+// React Router
+import { NavLink } from 'react-router-dom';
+
+<MenuItem component={<NavLink to="/dashboard" />}>Dashboard</MenuItem>;
+
+// Next.js
+import Link from 'next/link';
+
+<MenuItem component={<Link href="/dashboard" />}>Dashboard</MenuItem>;
+```
+
+### `rootStyles`
+
+Emotion `CSSObject` applied to the MenuItem's root `<li>` element.
+
+- **Type:** `CSSObject`
+- **Default:** `–`
+
+```jsx
+<MenuItem rootStyles={{ marginBottom: 4 }}>…</MenuItem>
+```
+
+## All props
+
+| Name | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `icon` | `ReactNode` | – | Icon node displayed before the label |
+| `active` | `boolean` | `false` | Active state (adds `aria-current="page"`) |
+| `disabled` | `boolean` | `false` | Disabled state (adds `aria-disabled`) |
+| `prefix` | `ReactNode` | – | Node between the icon and the label |
+| `suffix` | `ReactNode` | – | Node after the label |
+| `component` | `string \| ReactElement` | – | Element used for the button node |
+| `rootStyles` | `CSSObject` | – | Styles applied to the MenuItem root |
+
+Any other valid `<a>` props (e.g. `href`, `onClick`, `target`, `rel`) are forwarded to
+the underlying anchor.

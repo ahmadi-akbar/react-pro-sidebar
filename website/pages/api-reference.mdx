@@ -1,0 +1,148 @@
+---
+title: API Reference
+description: Complete prop reference for every react-pro-sidebar component.
+---
+
+# API Reference
+
+Complete prop reference for every component exported by `react-pro-sidebar`. For
+guided examples and a deeper walkthrough per component, see the
+[Components docs](/docs/components/sidebar).
+
+import { Callout } from 'nextra/components';
+
+<Callout type="info">
+  Props marked **New in v2** were introduced in the upcoming `2.0.0` release. See the
+  [Changelog](/docs/changelog) and [Migration Guide](/docs/migration) for details.
+</Callout>
+
+## Sidebar
+
+The root container that holds the sidebar's structure, controls collapse/toggle state,
+and provides theming.
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `collapsed` | `boolean` | `false` | Sidebar collapsed state |
+| `toggled` | `boolean` | `false` | Sidebar toggled (open) state when broken/overlay |
+| `width` | `string` | `'250px'` | Width of the sidebar |
+| `collapsedWidth` | `string` | `'80px'` | Width when collapsed |
+| `backgroundColor` | `string` | `'rgb(249, 249, 249, 0.7)'` | Sidebar background color |
+| `image` | `string` | – | URL of a background image (apply alpha to `backgroundColor` for visibility) |
+| `breakPoint` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| 'xxl' \| 'all' \| string` | – | Breakpoint at which the sidebar switches to overlay mode; accepts a predefined value or a custom CSS length (e.g. `'450px'`) |
+| `transitionDuration` | `number` | `300` | Transition duration in milliseconds |
+| `rtl` | `boolean` | `false` | Right-to-left direction |
+| `rootStyles` | `CSSObject` | – | Apply styles to the sidebar root element |
+| `onBackdropClick` | `() => void` | – | Called when the overlay backdrop is clicked |
+| `onBreakPoint` | `(broken: boolean) => void` | – | Called when the broken state changes |
+
+### Behaviors added in v2
+
+- Pressing **Escape** now closes the sidebar when open as an overlay (broken + toggled).
+- Focus moves into the sidebar when it opens as an overlay, so keyboard users land inside it.
+- Backdrop now uses `onKeyDown` and activates only on **Enter** / **Space** (no longer fires on any key).
+
+## Menu
+
+Container for `MenuItem` and `SubMenu` children. Holds the styling system
+(`menuItemStyles`), accordion coordination, and the global popover mode.
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `closeOnClick` | `boolean` | `false` | If `true` and the sidebar is collapsed, submenu popper closes on MenuItem click |
+| `popover` | `boolean` | `false` | **New in v2.** If `true`, top-level `SubMenu`s open as floating poppers even when expanded |
+| `accordion` | `boolean` | `false` | **New in v2.** If `true`, only one top-level `SubMenu` can be open at a time |
+| `menuItemStyles` | `MenuItemStyles` | – | Apply styles to MenuItem/SubMenu and their child slots (root, button, label, icon, prefix, suffix, …) |
+| `renderExpandIcon` | `(params) => ReactNode` | – | Custom render for the SubMenu expand icon. `params: { level, collapsed, disabled, active, open }` |
+| `transitionDuration` | `number` | `300` | Transition duration for sliding submenu content |
+| `rootStyles` | `CSSObject` | – | Apply styles to the Menu root element |
+
+## MenuItem
+
+A single clickable item inside a `Menu`. Can be rendered as any element via
+`component` for routing integrations.
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `icon` | `ReactNode` | – | Icon node displayed before the label |
+| `active` | `boolean` | `false` | Active state |
+| `disabled` | `boolean` | `false` | Disabled state |
+| `prefix` | `ReactNode` | – | Node displayed between the icon and the label |
+| `suffix` | `ReactNode` | – | Node displayed after the label |
+| `component` | `string \| ReactElement` | – | Component used for the button node (e.g. `'div'`, `<NavLink to="..." />`) |
+| `rootStyles` | `CSSObject` | – | Apply styles to the MenuItem root |
+
+### Accessibility added in v2
+
+- `aria-current="page"` is set on active items.
+- `aria-disabled` is set on disabled items.
+
+## SubMenu
+
+A nestable container that opens to reveal child `MenuItem` / `SubMenu` nodes.
+Cascades active state from descendants automatically.
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `label` | `string \| ReactNode` | – | Label displayed for the submenu trigger |
+| `icon` | `ReactNode` | – | Icon node displayed before the label |
+| `defaultOpen` | `boolean` | `false` | Initial open state (uncontrolled) |
+| `open` | `boolean` | – | Controlled open state |
+| `active` | `boolean` | `false` | Forced active state (the submenu is also active automatically when any descendant is active) |
+| `disabled` | `boolean` | `false` | Disabled state |
+| `prefix` | `ReactNode` | – | Node displayed between the icon and the label |
+| `suffix` | `ReactNode` | – | Node displayed after the label |
+| `accordion` | `boolean` | `false` | **New in v2.** Only one of this SubMenu's direct child `SubMenu`s can be open at a time |
+| `onOpenChange` | `(open: boolean) => void` | – | Called when the open state changes |
+| `component` | `string \| ReactElement` | – | Component used for the trigger button |
+| `rootStyles` | `CSSObject` | – | Apply styles to the SubMenu root |
+
+### Behaviors added in v2
+
+- Active state now **cascades automatically**: a `SubMenu` is marked active whenever any descendant is active.
+- Items in a closed submenu are no longer reachable via Tab or exposed to screen readers — closed content is now marked `inert`.
+- The trigger now uses `role="button"` so `aria-expanded` / `aria-haspopup` are valid.
+- `aria-expanded` on the trigger, `aria-haspopup="menu"` when a collapsed top-level submenu opens as a popup, and `aria-disabled` on disabled triggers.
+
+## Utility classes
+
+The package exports class-name registries that you can use as CSS selectors inside
+`rootStyles` or your own stylesheets.
+
+```ts
+import { sidebarClasses, menuClasses } from 'react-pro-sidebar';
+```
+
+| Registry | Keys |
+| -------- | ---- |
+| `sidebarClasses` | `root`, `container`, `image`, `backdrop`, `collapsed`, `toggled`, `rtl`, `broken` |
+| `menuClasses` | `root`, `menuItemRoot`, `subMenuRoot`, `button`, `prefix`, `suffix`, `label`, `icon`, `subMenuContent`, `SubMenuExpandIcon`, `disabled`, `active`, `open` |
+
+## Types
+
+```ts
+import type { CSSObject } from 'react-pro-sidebar';
+
+interface MenuItemStyles {
+  root?: ElementStyles;
+  button?: ElementStyles;
+  label?: ElementStyles;
+  prefix?: ElementStyles;
+  suffix?: ElementStyles;
+  icon?: ElementStyles;
+  subMenuContent?: ElementStyles;
+  SubMenuExpandIcon?: ElementStyles;
+}
+
+type ElementStyles =
+  | CSSObject
+  | ((params: MenuItemStylesParams) => CSSObject | undefined);
+
+interface MenuItemStylesParams {
+  level: number;
+  disabled: boolean;
+  active: boolean;
+  isSubmenu: boolean;
+  open?: boolean;
+}
+```

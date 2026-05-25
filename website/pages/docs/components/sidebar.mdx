@@ -1,0 +1,251 @@
+---
+title: Sidebar
+description: The root container that holds the sidebar's structure, controls collapse/toggle state, and provides theming.
+---
+
+import {
+  CollapsedDemo,
+  ToggledDemo,
+  WidthDemo,
+  CollapsedWidthDemo,
+  BackgroundColorDemo,
+  ImageDemo,
+  RtlDemo,
+  BreakPointDemo,
+  TransitionDurationDemo,
+} from '../../../components/demos';
+
+# Sidebar
+
+The `Sidebar` is the root container. It holds the visual chrome (width, background,
+optional image, border, overlay backdrop), owns the collapse/toggle/RTL state via
+controlled props, and broadcasts the current state to descendants through context.
+
+`Sidebar` is fully **controlled** — you own `collapsed` and `toggled` state and pass
+them in as props. Pair them with `onBackdropClick` (for closing the overlay when the
+user taps outside) and `onBreakPoint` (for tracking whether the sidebar is currently in
+its broken/overlay mode).
+
+```jsx
+import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
+
+<Sidebar collapsed={collapsed} toggled={toggled} onBackdropClick={() => setToggled(false)}>
+  <Menu>
+    <MenuItem>Dashboard</MenuItem>
+  </Menu>
+</Sidebar>;
+```
+
+## Props
+
+### `collapsed`
+
+Whether the sidebar is collapsed (icons only). Pair with `collapsedWidth` to control the
+collapsed width.
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+<CollapsedDemo />
+
+```jsx
+const [collapsed, setCollapsed] = useState(false);
+
+<Sidebar collapsed={collapsed}>...</Sidebar>;
+```
+
+### `toggled`
+
+Whether the sidebar is open in overlay mode. Only takes effect when the sidebar is
+"broken" (below the configured `breakPoint`).
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+<ToggledDemo />
+
+```jsx
+const [toggled, setToggled] = useState(false);
+
+<Sidebar
+  toggled={toggled}
+  onBackdropClick={() => setToggled(false)}
+  breakPoint="all"
+>
+  …
+</Sidebar>;
+```
+
+### `width`
+
+Width of the sidebar when expanded. Accepts any CSS length string.
+
+- **Type:** `string`
+- **Default:** `'250px'`
+
+<WidthDemo />
+
+```jsx
+<Sidebar width="320px">…</Sidebar>
+```
+
+### `collapsedWidth`
+
+Width of the sidebar when `collapsed` is `true`.
+
+- **Type:** `string`
+- **Default:** `'80px'`
+
+<CollapsedWidthDemo />
+
+```jsx
+<Sidebar collapsed collapsedWidth="60px">
+  …
+</Sidebar>
+```
+
+### `backgroundColor`
+
+Background color of the sidebar container. Use rgba/hex with alpha when combined with
+`image` so the image stays visible.
+
+- **Type:** `string`
+- **Default:** `'rgb(249, 249, 249, 0.7)'`
+
+<BackgroundColorDemo />
+
+### `image`
+
+URL of a background image rendered behind the sidebar's content. Apply a transparent
+`backgroundColor` (e.g. `rgba(255,255,255,0.85)`) so the image is visible.
+
+- **Type:** `string`
+- **Default:** `–`
+
+<ImageDemo />
+
+```jsx
+<Sidebar
+  image="/img/sidebar-bg.jpg"
+  backgroundColor="rgba(255,255,255,0.85)"
+>
+  …
+</Sidebar>
+```
+
+### `breakPoint`
+
+Breakpoint at which the sidebar switches into broken (overlay) mode. `'all'` keeps it
+overlay at every viewport size. Besides the predefined breakpoints you can pass any
+custom CSS length (e.g. `'450px'`) — the predefined values still autocomplete in your
+editor.
+
+- **Type:** `'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'all' | string`
+- **Default:** `–`
+
+<BreakPointDemo />
+
+| Value | Max-width |
+| ----- | --------- |
+| `xs`  | 480px |
+| `sm`  | 576px |
+| `md`  | 768px |
+| `lg`  | 992px |
+| `xl`  | 1200px |
+| `xxl` | 1600px |
+| `all` | always overlay |
+| custom (e.g. `450px`) | the value you pass |
+
+```jsx
+<Sidebar breakPoint="450px">…</Sidebar>
+```
+
+### `transitionDuration`
+
+Duration in milliseconds of the collapse/toggle transition.
+
+- **Type:** `number`
+- **Default:** `300`
+
+<TransitionDurationDemo />
+
+### `rtl`
+
+Right-to-left direction. Flips border sides, popper placement, and visual ordering.
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+<RtlDemo />
+
+```jsx
+<div style={{ direction: rtl ? 'rtl' : 'ltr' }}>
+  <Sidebar rtl={rtl}>…</Sidebar>
+</div>
+```
+
+### `rootStyles`
+
+Emotion `CSSObject` applied to the sidebar root element. Use this with
+`sidebarClasses.*` for targeted overrides.
+
+- **Type:** `CSSObject`
+- **Default:** `–`
+
+```jsx
+import { Sidebar, sidebarClasses } from 'react-pro-sidebar';
+
+<Sidebar
+  rootStyles={{
+    [`.${sidebarClasses.container}`]: {
+      backgroundColor: '#0b2948',
+      color: '#fff',
+    },
+  }}
+>
+  …
+</Sidebar>;
+```
+
+### `onBackdropClick`
+
+Called when the overlay backdrop is clicked. Typically used to close the sidebar
+(setting `toggled` back to `false`).
+
+- **Type:** `() => void`
+- **Default:** `–`
+
+```jsx
+<Sidebar toggled={toggled} onBackdropClick={() => setToggled(false)}>
+  …
+</Sidebar>
+```
+
+### `onBreakPoint`
+
+Called whenever the broken state changes — useful for tracking whether the sidebar is
+currently in overlay mode.
+
+- **Type:** `(broken: boolean) => void`
+- **Default:** `–`
+
+```jsx
+<Sidebar onBreakPoint={(broken) => setBroken(broken)}>…</Sidebar>
+```
+
+## All props
+
+| Name | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |
+| `collapsed` | `boolean` | `false` | Sidebar collapsed state |
+| `toggled` | `boolean` | `false` | Open state when broken (overlay) |
+| `width` | `string` | `'250px'` | Sidebar width when expanded |
+| `collapsedWidth` | `string` | `'80px'` | Width when collapsed |
+| `backgroundColor` | `string` | `'rgb(249, 249, 249, 0.7)'` | Container background color |
+| `image` | `string` | – | Background image URL |
+| `breakPoint` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| 'xxl' \| 'all' \| string` | – | Built-in responsive breakpoint, or a custom CSS value (e.g. `'450px'`) |
+| `transitionDuration` | `number` | `300` | Collapse / toggle transition duration in ms |
+| `rtl` | `boolean` | `false` | Right-to-left direction |
+| `rootStyles` | `CSSObject` | – | Styles applied to the sidebar root |
+| `onBackdropClick` | `() => void` | – | Called when the overlay backdrop is clicked |
+| `onBreakPoint` | `(broken: boolean) => void` | – | Called when the broken state changes |

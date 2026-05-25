@@ -1,9 +1,9 @@
 import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { Menu, menuClasses, MenuItem, Sidebar, SubMenu } from '../../src';
 import { Icon } from '../icons/Icon';
 
-const StoryParams: ComponentMeta<typeof Menu> = {
+const StoryParams: Meta<typeof Menu> = {
   title: 'Menu',
   component: Menu,
   argTypes: {},
@@ -11,7 +11,7 @@ const StoryParams: ComponentMeta<typeof Menu> = {
 
 export default StoryParams;
 
-export const Basic: ComponentStory<typeof Menu> = ({ ...props }) => (
+export const Basic: StoryFn<typeof Menu> = ({ ...props }) => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu {...props}>
@@ -46,7 +46,7 @@ Basic.parameters = {
   },
 };
 
-export const renderExpandIcon: ComponentStory<typeof Menu> = () => (
+export const renderExpandIcon: StoryFn<typeof Menu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu renderExpandIcon={({ open }) => <span>{open ? '-' : '+'}</span>}>
@@ -65,7 +65,7 @@ export const renderExpandIcon: ComponentStory<typeof Menu> = () => (
 
 renderExpandIcon.storyName = 'renderExpandIcon';
 
-export const MenuItemStyles: ComponentStory<typeof Menu> = () => (
+export const MenuItemStyles: StoryFn<typeof Menu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu
@@ -99,7 +99,7 @@ export const MenuItemStyles: ComponentStory<typeof Menu> = () => (
 
 MenuItemStyles.storyName = 'menuItemStyles';
 
-export const TransitionDuration: ComponentStory<typeof Menu> = () => (
+export const TransitionDuration: StoryFn<typeof Menu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu transitionDuration={1000}>
@@ -118,7 +118,7 @@ export const TransitionDuration: ComponentStory<typeof Menu> = () => (
 
 TransitionDuration.storyName = 'transitionDuration';
 
-export const CloseOnClick: ComponentStory<typeof Menu> = () => (
+export const CloseOnClick: StoryFn<typeof Menu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar collapsed>
       <Menu closeOnClick>
@@ -137,7 +137,7 @@ export const CloseOnClick: ComponentStory<typeof Menu> = () => (
 
 CloseOnClick.storyName = 'closeOnClick';
 
-export const RootStyles: ComponentStory<typeof Menu> = () => (
+export const RootStyles: StoryFn<typeof Menu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu
@@ -166,3 +166,111 @@ export const RootStyles: ComponentStory<typeof Menu> = () => (
 );
 
 RootStyles.storyName = 'rootStyles';
+
+export const Accordion: StoryFn<typeof Menu> = () => (
+  <div style={{ display: 'flex', height: '100%' }}>
+    <Sidebar>
+      <Menu accordion>
+        <SubMenu label="Charts" icon={<Icon name="bar-chart" />}>
+          <MenuItem> Pie charts</MenuItem>
+          <MenuItem> Line charts</MenuItem>
+          <MenuItem> Bar charts</MenuItem>
+        </SubMenu>
+        <SubMenu label="E-commerce" icon={<Icon name="shopping-cart" />}>
+          <MenuItem> Orders</MenuItem>
+          <MenuItem> Products</MenuItem>
+          <MenuItem> Customers</MenuItem>
+        </SubMenu>
+        <SubMenu label="Calendar" icon={<Icon name="calendar" />}>
+          <MenuItem> Schedule</MenuItem>
+          <MenuItem> Events</MenuItem>
+        </SubMenu>
+        <MenuItem icon={<Icon name="service" />}> Documentation</MenuItem>
+      </Menu>
+    </Sidebar>
+  </div>
+);
+
+Accordion.storyName = 'accordion';
+
+export const Popover: StoryFn<typeof Menu> = () => (
+  <div style={{ display: 'flex', height: '100%' }}>
+    <Sidebar>
+      <Menu popover>
+        <SubMenu label="Charts" icon={<Icon name="bar-chart" />}>
+          <MenuItem> Pie charts</MenuItem>
+          <MenuItem> Line charts</MenuItem>
+          <MenuItem> Bar charts</MenuItem>
+        </SubMenu>
+        <SubMenu label="E-commerce" icon={<Icon name="shopping-cart" />}>
+          <MenuItem> Orders</MenuItem>
+          <MenuItem> Products</MenuItem>
+        </SubMenu>
+        <MenuItem icon={<Icon name="calendar" />}> Calendar</MenuItem>
+        <MenuItem icon={<Icon name="service" />}> Documentation</MenuItem>
+      </Menu>
+    </Sidebar>
+  </div>
+);
+
+Popover.storyName = 'popover';
+
+Popover.parameters = {
+  docs: {
+    description: {
+      story:
+        'With `popover` set on `Menu`, top-level `SubMenu`s open as floating poppers (to the side) even while the sidebar is expanded — instead of sliding open inline. Useful for tall sidebars with many items. Click a submenu to open its flyout; click elsewhere or press Escape to close.',
+    },
+    source: {
+      code: `
+      import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
+
+      () => (
+        <Sidebar>
+          <Menu popover>
+            <SubMenu label="Charts">
+              <MenuItem>Pie charts</MenuItem>
+              <MenuItem>Line charts</MenuItem>
+            </SubMenu>
+            <SubMenu label="E-commerce">
+              <MenuItem>Orders</MenuItem>
+              <MenuItem>Products</MenuItem>
+            </SubMenu>
+            <MenuItem>Calendar</MenuItem>
+          </Menu>
+        </Sidebar>
+      )`,
+    },
+  },
+};
+
+Accordion.parameters = {
+  docs: {
+    description: {
+      story:
+        'When `accordion` is set on `Menu`, only one top-level `SubMenu` can be open at a time. Opening another automatically closes the previously open one. Nested submenus are not affected — set `accordion` on a `SubMenu` to coordinate its direct children.',
+    },
+    source: {
+      code: `
+      import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
+
+      () => (
+        <Sidebar>
+          <Menu accordion>
+            <SubMenu label="Charts">
+              <MenuItem>Pie charts</MenuItem>
+              <MenuItem>Line charts</MenuItem>
+            </SubMenu>
+            <SubMenu label="E-commerce">
+              <MenuItem>Orders</MenuItem>
+              <MenuItem>Products</MenuItem>
+            </SubMenu>
+            <SubMenu label="Calendar">
+              <MenuItem>Schedule</MenuItem>
+            </SubMenu>
+          </Menu>
+        </Sidebar>
+      )`,
+    },
+  },
+};

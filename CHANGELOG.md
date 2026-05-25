@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - unreleased
+
+> Breaking release. See [MIGRATION.md](./MIGRATION.md) for upgrade steps.
+
+### Removed
+
+- **[Sidebar]** Removed the `ProSidebarProvider` component (deprecated since 1.1)
+- Removed the `useProSidebar` hook (deprecated since 1.1) — use `Sidebar` props instead
+- **[Sidebar]** Removed the `defaultCollapsed` prop — use the controlled `collapsed` prop
+- **[Sidebar]** Removed the `breakPoint="always"` value — use `breakPoint="all"`
+- **[Sidebar]** Removed the `customBreakPoint` prop — pass a custom value to `breakPoint` instead (e.g. `breakPoint="450px"`)
+
+### Changed
+
+- **Breaking:** React peer dependency is now `>=18` (dropped React 16 / 17 support); React 19 is supported
+- Runtime dependencies (`@emotion`, `@popperjs`, `classnames`) are now externalized instead of bundled, reducing install size and avoiding duplicate copies
+- The package now ships a proper `exports` map with ESM (`dist/index.mjs`), CJS (`dist/index.js`) and a `types` entry
+
+### Added
+
+- **[Menu]** New `popover` prop — top-level `SubMenu`s open as floating poppers even when the sidebar is expanded (instead of sliding open inline)
+- **[Menu]** New `accordion` prop — when set, only one top-level `SubMenu` can be open at a time. Opening another closes the previously open one
+- **[SubMenu]** New `accordion` prop — coordinates only the submenu's direct children (per-level scope, independent of any ancestor accordion)
+- **[SubMenu]** Active state now cascades automatically — a `SubMenu` is marked active whenever any of its descendants is active
+- **[Sidebar]** Pressing `Escape` now closes the sidebar when open as an overlay (broken + toggled)
+- **[Sidebar]** Focus moves into the sidebar when it opens as an overlay
+- **[MenuItem]** `aria-current="page"` on active items and `aria-disabled` on disabled items
+- **[SubMenu]** `aria-expanded` on the trigger, `aria-haspopup="menu"` when a collapsed top-level submenu opens as a popup, and `aria-disabled` on disabled triggers
+
+### Fixed
+
+- **[Sidebar]** Backdrop now uses `onKeyDown` and activates only on `Enter` / `Space` (replacing the deprecated `onKeyPress`, which fired on any key)
+- **[SubMenu]** Items in a closed submenu are no longer reachable via Tab or exposed to screen readers — the closed submenu content is now marked `inert`
+- **[SubMenu]** Trigger now has `role="button"`, so its `aria-expanded` / `aria-haspopup` state is valid (it previously sat on a roleless `<a>`)
+
 ## [1.1.0] - 2024-02-03
 
 ## Fixed

@@ -41,16 +41,17 @@ export const menuButtonStyles = (props: MenuButtonStylesProps) => {
     }
 
     ${
-      disabled &&
-      ` 
+      disabled
+        ? `
       pointer-events: none;
       cursor: default;
       color:#adadad;
         `
+        : ''
     }
 
-    ${active && 'background-color: #e2eef9;'}
-  
+    ${active ? 'color: #4ea9e8;' : ''}
+
   `;
 };
 

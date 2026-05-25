@@ -3,7 +3,8 @@ import { createPopper } from '@popperjs/core';
 import { SidebarContext } from '../components/Sidebar';
 
 interface PopperOptions {
-  level: number;
+  /** Whether this submenu should render as a floating popper. */
+  popper: boolean;
   buttonRef: React.RefObject<HTMLAnchorElement>;
   contentRef: React.RefObject<HTMLDivElement>;
 }
@@ -13,16 +14,17 @@ interface PopperResult {
 }
 
 export const usePopper = (options: PopperOptions): PopperResult => {
-  const { level, buttonRef, contentRef } = options;
+  const { popper, buttonRef, contentRef } = options;
 
-  const { collapsed, toggled, transitionDuration } = React.useContext(SidebarContext);
+  const { toggled, transitionDuration } = React.useContext(SidebarContext);
   const popperInstanceRef = React.useRef<ReturnType<typeof createPopper> | undefined>();
 
   /**
-   * create popper instance only on first level submenu components and when sidebar is collapsed
+   * Create the popper instance only when the submenu renders as a popper
+   * (collapsed top-level submenu, or `popover` mode while expanded).
    */
   React.useEffect(() => {
-    if (level === 0 && collapsed && contentRef.current && buttonRef.current) {
+    if (popper && contentRef.current && buttonRef.current) {
       popperInstanceRef.current = createPopper(buttonRef.current, contentRef.current, {
         placement: 'right',
         strategy: 'fixed',
@@ -38,24 +40,31 @@ export const usePopper = (options: PopperOptions): PopperResult => {
     }
 
     return () => popperInstanceRef.current?.destroy();
-  }, [level, collapsed, contentRef, buttonRef]);
+  }, [popper, contentRef, buttonRef]);
 
   /**
    * update popper instance (position) when buttonRef or contentRef changes
    */
   React.useEffect(() => {
+    let resizeObserver: ResizeObserver | undefined;
+
     if (contentRef.current && buttonRef.current) {
-      const ro = new ResizeObserver(() => {
+      resizeObserver = new ResizeObserver(() => {
         popperInstanceRef.current?.update();
       });
 
-      ro.observe(contentRef.current);
-      ro.observe(buttonRef.current);
+      resizeObserver.observe(contentRef.current);
+      resizeObserver.observe(buttonRef.current);
     }
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       popperInstanceRef.current?.update();
     }, transitionDuration);
+
+    return () => {
+      resizeObserver?.disconnect();
+      clearTimeout(timer);
+    };
   }, [transitionDuration, toggled, contentRef, buttonRef]);
 
   return { popperInstance: popperInstanceRef.current };

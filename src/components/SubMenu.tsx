@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 import React from 'react';
 import styled, { CSSObject } from '@emotion/styled';
 import classnames from 'classnames';
@@ -17,7 +16,14 @@ import {
 import { usePopper } from '../hooks/usePopper';
 import { MenuButton, menuButtonStyles } from './MenuButton';
 import { SidebarContext } from './Sidebar';
-import { LevelContext } from './Menu';
+import {
+  AccordionContext,
+  AccordionContextValue,
+  LevelContext,
+  resolveElementStyles,
+  SubMenuActiveContext,
+  SubMenuActiveContextValue,
+} from './Menu';
 
 export interface SubMenuProps
   extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> {
@@ -70,6 +76,14 @@ export interface SubMenuProps
    * Apply styles from the root element
    */
   rootStyles?: CSSObject;
+
+  /**
+   * If `true`, only one direct-child `SubMenu` can be open at a time (accordion
+   * behavior). Opening another closes the previously open one. Scoped to this
+   * submenu's immediate children.
+   * @default ```false```
+   */
+  accordion?: boolean;
 
   /**
    * callback function to be called when the open state of the sub menu changes
@@ -133,6 +147,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
     defaultOpen,
     active = false,
     disabled = false,
+    accordion = false,
     rootStyles,
     component,
     onOpenChange,
@@ -143,74 +158,82 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
   ref,
 ) => {
   const level = React.useContext(LevelContext);
+  const parentAccordion = React.useContext(AccordionContext);
+  const parentActive = React.useContext(SubMenuActiveContext);
+  const id = React.useId();
 
   const {
     collapsed,
     rtl,
     transitionDuration: sidebarTransitionDuration,
   } = React.useContext(SidebarContext);
-  const { renderExpandIcon, closeOnClick, menuItemStyles, transitionDuration } = useMenu();
+  const { renderExpandIcon, closeOnClick, popover, menuItemStyles } = useMenu();
 
-  const [open, setOpen] = React.useState(!!defaultOpen);
+  // Top-level submenus render as a floating popper when the sidebar is
+  // collapsed, or when `popover` mode is enabled while expanded.
+  const isPopper = (collapsed || !!popover) && level === 0;
+
+  const [internalOpen, setInternalOpen] = React.useState(!!defaultOpen);
   const [openWhenCollapsed, setOpenWhenCollapsed] = React.useState(false);
-  const [mounted, setMounted] = React.useState(false);
 
   const buttonRef = React.useRef<HTMLAnchorElement>(null);
   const contentRef = React.useRef<HTMLDivElement>(null);
-  const timer = React.useRef<ReturnType<typeof setTimeout>>();
 
   const { popperInstance } = usePopper({
-    level,
+    popper: isPopper,
     buttonRef,
     contentRef,
   });
 
-  const expandContent = React.useCallback(() => {
-    const target = contentRef.current;
-    if (target) {
-      const height = target?.querySelector(`.${menuClasses.subMenuContent} > ul`)?.clientHeight;
-      target.style.overflow = 'hidden';
-      target.style.height = `${height}px`;
+  // When a parent accordion is active, the open state is owned by it; otherwise
+  // it's our internal state. `openControlled` (when defined) always wins.
+  const accordionActiveId = parentAccordion ? parentAccordion.activeId : null;
+  const accordionOpen = parentAccordion ? accordionActiveId === id : false;
+  const open = openControlled ?? (parentAccordion ? accordionOpen : internalOpen);
 
-      timer.current = setTimeout(() => {
-        target.style.overflow = 'auto';
-        target.style.height = 'auto';
-      }, transitionDuration);
+  // Mirror the accordion's open state into the internal state so that, if the
+  // `accordion` prop is later flipped off, the current open/closed state is
+  // preserved instead of reverting to `defaultOpen`.
+  React.useEffect(() => {
+    if (parentAccordion) {
+      setInternalOpen(accordionOpen);
     }
-  }, [transitionDuration]);
+  }, [parentAccordion, accordionOpen]);
 
-  const collapseContent = () => {
-    const target = contentRef.current;
-
-    if (target) {
-      const height = target?.querySelector(`.${menuClasses.subMenuContent} > ul`)?.clientHeight;
-      target.style.overflow = 'hidden';
-      target.style.height = `${height}px`;
-      target.offsetHeight;
-      target.style.height = '0px';
+  // Register `defaultOpen` with a parent accordion on mount. If multiple
+  // siblings register, the last one wins; warn so it's not silent. We track
+  // via a ref on the context because sibling effects in the same commit
+  // can't see each other's state updates.
+  React.useEffect(() => {
+    if (parentAccordion && defaultOpen) {
+      if (parentAccordion.defaultOpenRegisteredRef.current !== null) {
+        console.warn(
+          '[react-pro-sidebar] Multiple SubMenus have `defaultOpen` inside an accordion group; only the last-rendered one will be open.',
+        );
+      }
+      parentAccordion.defaultOpenRegisteredRef.current = id;
+      parentAccordion.setActive(id, true);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // The content slides open/closed via CSS (grid-template-rows); we just flip
+  // the open state here (or hand it off to the accordion).
   const handleSlideToggle = (): void => {
-    if (!(level === 0 && collapsed)) {
+    if (!isPopper) {
       if (typeof openControlled === 'undefined') {
-        clearTimeout(Number(timer.current));
-        open ? collapseContent() : expandContent();
-        onOpenChange?.(!open);
-        setOpen(!open);
+        const next = !open;
+        if (parentAccordion) {
+          parentAccordion.setActive(id, next);
+        } else {
+          setInternalOpen(next);
+        }
+        onOpenChange?.(next);
       } else {
         onOpenChange?.(!openControlled);
       }
     }
   };
-
-  React.useEffect(() => {
-    if (!(level === 0 && collapsed) && typeof openControlled !== 'undefined' && mounted) {
-      clearTimeout(Number(timer.current));
-      !openControlled ? collapseContent() : expandContent();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collapsed, expandContent, label, level, onOpenChange, openControlled]);
 
   const handleOnClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     onClick?.(event);
@@ -224,63 +247,69 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
     }
   };
 
-  const getSubMenuItemStyles = (element: MenuItemElement): CSSObject | undefined => {
-    if (menuItemStyles) {
-      const params = { level, disabled, active, isSubmenu: true, open: openControlled ?? open };
-      const {
-        root: rootElStyles,
-        button: buttonElStyles,
-        label: labelElStyles,
-        icon: iconElStyles,
-        prefix: prefixElStyles,
-        suffix: suffixElStyles,
-        subMenuContent: subMenuContentElStyles,
-        SubMenuExpandIcon: SubMenuExpandIconElStyles,
-      } = menuItemStyles;
+  // Track active descendants so this submenu highlights when any child is
+  // active, then report its own effective-active state up to its parent.
+  const [activeDescendants, setActiveDescendants] = React.useState<Set<string>>(() => new Set());
+  const registerActive = React.useCallback((childId: string, isActive: boolean) => {
+    setActiveDescendants((prev) => {
+      if (isActive === prev.has(childId)) return prev;
+      const next = new Set(prev);
+      if (isActive) next.add(childId);
+      else next.delete(childId);
+      return next;
+    });
+  }, []);
 
-      switch (element) {
-        case 'root':
-          return typeof rootElStyles === 'function' ? rootElStyles(params) : rootElStyles;
-
-        case 'button':
-          return typeof buttonElStyles === 'function' ? buttonElStyles(params) : buttonElStyles;
-
-        case 'label':
-          return typeof labelElStyles === 'function' ? labelElStyles(params) : labelElStyles;
-
-        case 'icon':
-          return typeof iconElStyles === 'function' ? iconElStyles(params) : iconElStyles;
-
-        case 'prefix':
-          return typeof prefixElStyles === 'function' ? prefixElStyles(params) : prefixElStyles;
-
-        case 'suffix':
-          return typeof suffixElStyles === 'function' ? suffixElStyles(params) : suffixElStyles;
-
-        case 'SubMenuExpandIcon':
-          return typeof SubMenuExpandIconElStyles === 'function'
-            ? SubMenuExpandIconElStyles(params)
-            : SubMenuExpandIconElStyles;
-
-        case 'subMenuContent':
-          return typeof subMenuContentElStyles === 'function'
-            ? subMenuContentElStyles(params)
-            : subMenuContentElStyles;
-
-        default:
-          return undefined;
-      }
-    }
-  };
+  const effectiveActive = active || activeDescendants.size > 0;
 
   React.useEffect(() => {
-    setTimeout(() => popperInstance?.update(), sidebarTransitionDuration);
-    if (collapsed && level === 0) {
+    parentActive?.registerActive(id, effectiveActive);
+    return () => parentActive?.registerActive(id, false);
+  }, [parentActive, id, effectiveActive]);
+
+  const activeContextValue = React.useMemo<SubMenuActiveContextValue>(
+    () => ({ registerActive }),
+    [registerActive],
+  );
+
+  const styleParams = { level, disabled, active: effectiveActive, isSubmenu: true, open };
+
+  // State for accordion-coordinating this submenu's direct children (next level).
+  const [childActiveId, setChildActiveId] = React.useState<string | null>(null);
+  const setChildActive = React.useCallback((cid: string, isOpen: boolean) => {
+    setChildActiveId((prev) => (isOpen ? cid : prev === cid ? null : prev));
+  }, []);
+  const childDefaultOpenRegisteredRef = React.useRef<string | null>(null);
+  const childAccordionContext = React.useMemo<AccordionContextValue>(
+    () =>
+      accordion
+        ? {
+            activeId: childActiveId,
+            setActive: setChildActive,
+            defaultOpenRegisteredRef: childDefaultOpenRegisteredRef,
+          }
+        : null,
+    [accordion, childActiveId, setChildActive],
+  );
+
+  const getSubMenuItemStyles = (element: MenuItemElement): CSSObject | undefined =>
+    resolveElementStyles(menuItemStyles, element, styleParams);
+
+  // Reposition the popper after the sidebar's collapse/rtl transition.
+  React.useEffect(() => {
+    const timer = setTimeout(() => popperInstance?.update(), sidebarTransitionDuration);
+    return () => clearTimeout(timer);
+  }, [collapsed, level, rtl, sidebarTransitionDuration, popperInstance]);
+
+  // Reset the popper to closed when the popper mode toggles (entering collapsed
+  // or popover mode) — not when the popper instance first becomes available.
+  React.useEffect(() => {
+    if (isPopper) {
       setOpenWhenCollapsed(false);
       // ? if its useful to close first level submenus on collapse sidebar uncomment the code below
       // setOpen(false);
     }
-  }, [collapsed, level, rtl, sidebarTransitionDuration, popperInstance]);
+  }, [isPopper]);
 
   React.useEffect(() => {
     const handleTogglePopper = (target: Node) => {
@@ -315,7 +344,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
 
     removeEventListeners();
 
-    if (collapsed && level === 0) {
+    if (isPopper) {
       document.addEventListener('click', handleDocumentClick, false);
       document.addEventListener('keyup', handleDocumentKeyUp, false);
     }
@@ -323,16 +352,12 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
     return () => {
       removeEventListeners();
     };
-  }, [collapsed, level, closeOnClick, openWhenCollapsed]);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  }, [isPopper, closeOnClick, openWhenCollapsed]);
 
   const sharedClasses = {
-    [menuClasses.active]: active,
+    [menuClasses.active]: effectiveActive,
     [menuClasses.disabled]: disabled,
-    [menuClasses.open]: openControlled ?? open,
+    [menuClasses.open]: open,
   };
 
   return (
@@ -349,7 +374,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
       collapsed={collapsed}
       rtl={rtl}
       disabled={disabled}
-      active={active}
+      active={effectiveActive}
       buttonStyles={getSubMenuItemStyles('button')}
       rootStyles={rootStyles}
     >
@@ -362,6 +387,10 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
         onKeyUp={handleOnKeyUp}
         component={component}
         tabIndex={0}
+        role="button"
+        aria-expanded={open}
+        aria-haspopup={isPopper ? 'menu' : undefined}
+        aria-disabled={disabled || undefined}
         {...rest}
       >
         {icon && (
@@ -417,13 +446,13 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
             renderExpandIcon({
               level,
               disabled,
-              active,
-              open: openControlled ?? open,
+              active: effectiveActive,
+              open,
             })
           ) : collapsed && level === 0 ? (
             <StyledExpandIconCollapsed />
           ) : (
-            <StyledExpandIcon rtl={rtl} open={openControlled ?? open} />
+            <StyledExpandIcon rtl={rtl} open={open} />
           )}
         </StyledExpandIconWrapper>
       </MenuButton>
@@ -431,14 +460,18 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
       <SubMenuContent
         ref={contentRef}
         openWhenCollapsed={openWhenCollapsed}
-        open={openControlled ?? open}
-        firstLevel={level === 0}
-        collapsed={collapsed}
-        defaultOpen={(openControlled && !mounted) || defaultOpen}
+        open={open}
+        popper={isPopper}
         className={classnames(menuClasses.subMenuContent, sharedClasses)}
         rootStyles={getSubMenuItemStyles('subMenuContent')}
       >
-        <LevelContext.Provider value={level + 1}>{children}</LevelContext.Provider>
+        <LevelContext.Provider value={level + 1}>
+          <AccordionContext.Provider value={childAccordionContext}>
+            <SubMenuActiveContext.Provider value={activeContextValue}>
+              {children}
+            </SubMenuActiveContext.Provider>
+          </AccordionContext.Provider>
+        </LevelContext.Provider>
       </SubMenuContent>
     </StyledSubMenu>
   );

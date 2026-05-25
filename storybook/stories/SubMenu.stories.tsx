@@ -1,9 +1,9 @@
 import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { Menu, menuClasses, MenuItem, Sidebar, SubMenu } from '../../src';
 import { Icon } from '../icons/Icon';
 
-const StoryParams: ComponentMeta<typeof SubMenu> = {
+const StoryParams: Meta<typeof SubMenu> = {
   title: 'SubMenu',
   component: SubMenu,
   argTypes: {},
@@ -11,7 +11,7 @@ const StoryParams: ComponentMeta<typeof SubMenu> = {
 
 export default StoryParams;
 
-export const Basic: ComponentStory<typeof SubMenu> = ({ ...props }) => (
+export const Basic: StoryFn<typeof SubMenu> = ({ ...props }) => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -64,7 +64,7 @@ Basic.parameters = {
   },
 };
 
-export const WithIcon: ComponentStory<typeof SubMenu> = () => (
+export const WithIcon: StoryFn<typeof SubMenu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -90,7 +90,7 @@ export const WithIcon: ComponentStory<typeof SubMenu> = () => (
 
 WithIcon.storyName = 'icon';
 
-export const Prefix: ComponentStory<typeof SubMenu> = () => (
+export const Prefix: StoryFn<typeof SubMenu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -115,7 +115,7 @@ export const Prefix: ComponentStory<typeof SubMenu> = () => (
 );
 Prefix.storyName = 'prefix';
 
-export const Suffix: ComponentStory<typeof SubMenu> = () => (
+export const Suffix: StoryFn<typeof SubMenu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -140,32 +140,28 @@ export const Suffix: ComponentStory<typeof SubMenu> = () => (
 );
 Suffix.storyName = 'suffix';
 
-export const Active: ComponentStory<typeof SubMenu> = () => (
+export const Active: StoryFn<typeof SubMenu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
-        <Menu>
-          <SubMenu active label="Charts (active)">
-            <MenuItem> Pie charts</MenuItem>
-            <MenuItem> Line charts</MenuItem>
-            <MenuItem> Bar charts</MenuItem>
+        <SubMenu label="Settings" defaultOpen>
+          <SubMenu label="Account" defaultOpen>
+            <MenuItem active> Profile (active)</MenuItem>
+            <MenuItem> Password</MenuItem>
           </SubMenu>
-          <SubMenu label="Maps">
-            <MenuItem> Google maps</MenuItem>
-            <MenuItem> Open street maps</MenuItem>
+          <SubMenu label="Notifications">
+            <MenuItem> Email</MenuItem>
+            <MenuItem> Push</MenuItem>
           </SubMenu>
-          <SubMenu label="Theme">
-            <MenuItem> Dark</MenuItem>
-            <MenuItem> Light</MenuItem>
-          </SubMenu>
-        </Menu>
+        </SubMenu>
       </Menu>
     </Sidebar>
   </div>
 );
+
 Active.storyName = 'active';
 
-export const Disabled: ComponentStory<typeof SubMenu> = () => (
+export const Disabled: StoryFn<typeof SubMenu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -190,7 +186,7 @@ export const Disabled: ComponentStory<typeof SubMenu> = () => (
 );
 Disabled.storyName = 'disabled';
 
-export const Component: ComponentStory<typeof MenuItem> = () => (
+export const Component: StoryFn<typeof MenuItem> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -205,7 +201,7 @@ export const Component: ComponentStory<typeof MenuItem> = () => (
 );
 Component.storyName = 'component';
 
-export const DefaultOpen: ComponentStory<typeof SubMenu> = () => (
+export const DefaultOpen: StoryFn<typeof SubMenu> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -230,7 +226,7 @@ export const DefaultOpen: ComponentStory<typeof SubMenu> = () => (
 );
 DefaultOpen.storyName = 'defaultOpen';
 
-export const Open: ComponentStory<typeof SubMenu> = () => {
+export const Open: StoryFn<typeof SubMenu> = () => {
   const [open, setOpen] = React.useState<'charts' | 'maps' | 'theme' | undefined>();
 
   const handleOpenSubMenu = (key: 'charts' | 'maps' | 'theme') => {
@@ -275,7 +271,7 @@ export const Open: ComponentStory<typeof SubMenu> = () => {
 };
 Open.storyName = 'open';
 
-export const RootStyles: ComponentStory<typeof MenuItem> = () => (
+export const RootStyles: StoryFn<typeof MenuItem> = () => (
   <div style={{ display: 'flex', height: '100%' }}>
     <Sidebar>
       <Menu>
@@ -314,3 +310,65 @@ export const RootStyles: ComponentStory<typeof MenuItem> = () => (
   </div>
 );
 RootStyles.storyName = 'rootStyles';
+
+export const Accordion: StoryFn<typeof SubMenu> = () => (
+  <div style={{ display: 'flex', height: '100%' }}>
+    <Sidebar>
+      <Menu>
+        <SubMenu label="Settings" accordion defaultOpen>
+          <SubMenu label="Account">
+            <MenuItem> Profile</MenuItem>
+            <MenuItem> Password</MenuItem>
+          </SubMenu>
+          <SubMenu label="Notifications">
+            <MenuItem> Email</MenuItem>
+            <MenuItem> Push</MenuItem>
+          </SubMenu>
+          <SubMenu label="Privacy">
+            <MenuItem> Data</MenuItem>
+            <MenuItem> Sharing</MenuItem>
+          </SubMenu>
+        </SubMenu>
+        <SubMenu label="Tools" defaultOpen>
+          <SubMenu label="Editor">
+            <MenuItem> Theme</MenuItem>
+          </SubMenu>
+          <SubMenu label="Terminal">
+            <MenuItem> Shell</MenuItem>
+          </SubMenu>
+        </SubMenu>
+      </Menu>
+    </Sidebar>
+  </div>
+);
+
+Accordion.storyName = 'accordion';
+
+Accordion.parameters = {
+  docs: {
+    description: {
+      story:
+        '`accordion` on a `SubMenu` coordinates only its direct children — opening one nested submenu inside `Settings` closes its siblings. The neighboring `Tools` submenu is unaffected: its own nested submenus open independently of each other.',
+    },
+    source: {
+      code: `
+      import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
+
+      () => (
+        <Sidebar>
+          <Menu>
+            <SubMenu label="Settings" accordion defaultOpen>
+              <SubMenu label="Account">…</SubMenu>
+              <SubMenu label="Notifications">…</SubMenu>
+              <SubMenu label="Privacy">…</SubMenu>
+            </SubMenu>
+            <SubMenu label="Tools" defaultOpen>
+              <SubMenu label="Editor">…</SubMenu>
+              <SubMenu label="Terminal">…</SubMenu>
+            </SubMenu>
+          </Menu>
+        </Sidebar>
+      )`,
+    },
+  },
+};

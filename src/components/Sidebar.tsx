@@ -1,22 +1,26 @@
 import React from 'react';
 import styled, { CSSObject } from '@emotion/styled';
 import classnames from 'classnames';
-import { useLegacySidebar } from '../hooks/useLegacySidebar';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { sidebarClasses } from '../utils/utilityClasses';
 import { StyledBackdrop } from '../styles/StyledBackdrop';
 
-type BreakPoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'always' | 'all';
+type PredefinedBreakPoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'all';
 
-const BREAK_POINTS = {
+/**
+ * Accepts a predefined breakpoint (with editor autocomplete) or any custom CSS
+ * length such as `'450px'`. The `string & {}` keeps the literal suggestions
+ * while still allowing arbitrary strings.
+ */
+type BreakPoint = PredefinedBreakPoint | (string & {});
+
+const BREAK_POINTS: Record<Exclude<PredefinedBreakPoint, 'all'>, string> = {
   xs: '480px',
   sm: '576px',
   md: '768px',
   lg: '992px',
   xl: '1200px',
   xxl: '1600px',
-  always: 'always',
-  all: 'all',
 };
 
 export interface SidebarProps extends React.HTMLAttributes<HTMLHtmlElement> {
@@ -38,24 +42,12 @@ export interface SidebarProps extends React.HTMLAttributes<HTMLHtmlElement> {
   collapsedWidth?: string;
 
   /**
-   * initial collapsed status
-   * @default ```false```
-   *
-   * @deprecated use ```collapsed``` instead
-   */
-  defaultCollapsed?: boolean;
-
-  /**
-   * set when the sidebar should trigger responsiveness behavior
-   * @type `xs | sm | md | lg | xl | xxl | all | undefined`
+   * set when the sidebar should trigger responsiveness behavior.
+   * accepts a predefined breakpoint (`xs | sm | md | lg | xl | xxl | all`) or a
+   * custom CSS value such as `'450px'`
+   * @type `xs | sm | md | lg | xl | xxl | all | (string & {}) | undefined`
    */
   breakPoint?: BreakPoint;
-
-  /**
-   * alternative breakpoint value that will be used to trigger responsiveness
-   *
-   */
-  customBreakPoint?: string;
 
   /**
    * sidebar background color
@@ -212,11 +204,9 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
       onBreakPoint,
       width = '250px',
       collapsedWidth = '80px',
-      defaultCollapsed,
       className,
       children,
       breakPoint,
-      customBreakPoint,
       backgroundColor = 'rgb(249, 249, 249, 0.7)',
       transitionDuration = 300,
       image,
@@ -227,27 +217,18 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
     ref,
   ) => {
     const getBreakpointValue = () => {
-      if (customBreakPoint) {
-        return `(max-width: ${customBreakPoint})`;
+      if (!breakPoint) return undefined;
+
+      if (breakPoint === 'all') {
+        return `screen`;
       }
 
-      if (breakPoint) {
-        if (['xs', 'sm', 'md', 'lg', 'xl', 'xxl'].includes(breakPoint)) {
-          return `(max-width: ${BREAK_POINTS[breakPoint]})`;
-        }
-
-        if (breakPoint === 'always' || breakPoint === 'all') {
-          if (breakPoint === 'always') {
-            console.warn(
-              'The "always" breakPoint is deprecated and will be removed in future release. ' +
-                'Please use the "all" breakPoint instead.',
-            );
-          }
-          return `screen`;
-        }
-
-        return `(max-width: ${breakPoint})`;
+      // predefined breakpoint -> its px value; otherwise treat as a custom value
+      if (breakPoint in BREAK_POINTS) {
+        return `(max-width: ${BREAK_POINTS[breakPoint as Exclude<PredefinedBreakPoint, 'all'>]})`;
       }
+
+      return `(max-width: ${breakPoint})`;
     };
 
     const breakpointCallbackFnRef = React.useRef<(broken: boolean) => void>();
@@ -258,49 +239,73 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
 
     const broken = useMediaQuery(getBreakpointValue());
 
-    const [mounted, setMounted] = React.useState(false);
-
-    const legacySidebarContext = useLegacySidebar();
-
-    const collapsedValue =
-      collapsed ?? (!mounted && defaultCollapsed ? true : legacySidebarContext?.collapsed);
-    const toggledValue = toggled ?? legacySidebarContext?.toggled;
+    const collapsedValue = collapsed;
+    const toggledValue = toggled;
 
     const handleBackdropClick = () => {
       onBackdropClick?.();
-      legacySidebarContext?.updateSidebarState({ toggled: false });
     };
+
+    const handleBackdropKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        onBackdropClick?.();
+      }
+    };
+
+    const innerRef = React.useRef<HTMLHtmlElement | null>(null);
+
+    const setSidebarRef = React.useCallback(
+      (node: HTMLHtmlElement | null) => {
+        innerRef.current = node;
+        if (typeof ref === 'function') {
+          ref(node);
+        } else if (ref) {
+          (ref as React.MutableRefObject<HTMLHtmlElement | null>).current = node;
+        }
+      },
+      [ref],
+    );
+
+    const isOverlayOpen = !!(broken && toggledValue);
+
+    const sidebarContextValue = React.useMemo(
+      () => ({ collapsed: collapsedValue, toggled: toggledValue, rtl, transitionDuration }),
+      [collapsedValue, toggledValue, rtl, transitionDuration],
+    );
 
     React.useEffect(() => {
       breakpointCallbackFnRef.current?.(broken);
     }, [broken]);
 
-    // TODO: remove in next major version
+    // When the sidebar opens as an overlay (broken + toggled), move focus to it
+    // so keyboard users land inside the sidebar rather than on the backdrop.
     React.useEffect(() => {
-      legacySidebarContext?.updateSidebarState({ broken, rtl, transitionDuration });
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [broken, legacySidebarContext?.updateSidebarState, rtl, transitionDuration]);
-
-    // TODO: remove in next major version
-    React.useEffect(() => {
-      if (!mounted) {
-        legacySidebarContext?.updateSidebarState({
-          collapsed: defaultCollapsed,
-        });
-        setMounted(true);
+      if (isOverlayOpen) {
+        innerRef.current?.focus();
       }
+    }, [isOverlayOpen]);
 
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [defaultCollapsed, mounted, legacySidebarContext?.updateSidebarState]);
+    // Close the overlay sidebar on Escape from anywhere.
+    React.useEffect(() => {
+      if (!isOverlayOpen) return undefined;
+
+      const handleEscape = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          onBackdropClick?.();
+        }
+      };
+
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }, [isOverlayOpen, onBackdropClick]);
 
     return (
-      <SidebarContext.Provider
-        value={{ collapsed: collapsedValue, toggled: toggledValue, rtl, transitionDuration }}
-      >
+      <SidebarContext.Provider value={sidebarContextValue}>
         <StyledSidebar
-          ref={ref}
+          ref={setSidebarRef}
           data-testid={`${sidebarClasses.root}-test-id`}
+          tabIndex={-1}
           rtl={rtl}
           rootStyles={rootStyles}
           width={width}
@@ -342,7 +347,7 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
               tabIndex={0}
               aria-label="backdrop"
               onClick={handleBackdropClick}
-              onKeyPress={handleBackdropClick}
+              onKeyDown={handleBackdropKeyDown}
               className={sidebarClasses.backdrop}
             />
           )}
@@ -351,3 +356,5 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
     );
   },
 );
+
+Sidebar.displayName = 'Sidebar';
