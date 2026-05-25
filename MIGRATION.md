@@ -117,7 +117,21 @@ Use `"all"` (the two were aliases; `"always"` had been deprecated).
 <Sidebar breakPoint="all" />
 ```
 
-### 4. React 16 / 17 no longer supported
+### 4. `customBreakPoint` prop removed
+
+Pass the custom value directly to `breakPoint`, which now accepts any CSS
+length in addition to the predefined breakpoints (the predefined values still
+autocomplete).
+
+```jsx
+// before
+<Sidebar customBreakPoint="450px" />
+
+// after
+<Sidebar breakPoint="450px" />
+```
+
+### 5. React 16 / 17 no longer supported
 
 The peer dependency is now `react >=18` / `react-dom >=18`. React 19 is
 supported. If you're on 16/17, upgrade React before upgrading this package.
@@ -146,5 +160,6 @@ These require no code changes but are worth knowing:
 - [ ] Replace `onBreakPoint` for the old `broken` value.
 - [ ] Replace `defaultCollapsed` with `collapsed`.
 - [ ] Replace `breakPoint="always"` with `breakPoint="all"`.
+- [ ] Replace `customBreakPoint="…"` with `breakPoint="…"`.
 - [ ] Ensure React `>=18` is installed.
 - [ ] Run your type-checker — removed exports surface as clear errors.

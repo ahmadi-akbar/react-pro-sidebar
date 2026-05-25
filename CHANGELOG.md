@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed the `useProSidebar` hook (deprecated since 1.1) — use `Sidebar` props instead
 - **[Sidebar]** Removed the `defaultCollapsed` prop — use the controlled `collapsed` prop
 - **[Sidebar]** Removed the `breakPoint="always"` value — use `breakPoint="all"`
+- **[Sidebar]** Removed the `customBreakPoint` prop — pass a custom value to `breakPoint` instead (e.g. `breakPoint="450px"`)
 
 ### Changed
 

@@ -136,9 +136,11 @@ URL of a background image rendered behind the sidebar's content. Apply a transpa
 ### `breakPoint`
 
 Breakpoint at which the sidebar switches into broken (overlay) mode. `'all'` keeps it
-overlay at every viewport size.
+overlay at every viewport size. Besides the predefined breakpoints you can pass any
+custom CSS length (e.g. `'450px'`) — the predefined values still autocomplete in your
+editor.
 
-- **Type:** `'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'all'`
+- **Type:** `'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'all' | string`
 - **Default:** `–`
 
 <BreakPointDemo />
@@ -152,16 +154,10 @@ overlay at every viewport size.
 | `xl`  | 1200px |
 | `xxl` | 1600px |
 | `all` | always overlay |
-
-### `customBreakPoint`
-
-A custom breakpoint value that overrides `breakPoint`. Any valid CSS length.
-
-- **Type:** `string`
-- **Default:** `–`
+| custom (e.g. `450px`) | the value you pass |
 
 ```jsx
-<Sidebar customBreakPoint="900px">…</Sidebar>
+<Sidebar breakPoint="450px">…</Sidebar>
 ```
 
 ### `transitionDuration`
@@ -247,8 +243,7 @@ currently in overlay mode.
 | `collapsedWidth` | `string` | `'80px'` | Width when collapsed |
 | `backgroundColor` | `string` | `'rgb(249, 249, 249, 0.7)'` | Container background color |
 | `image` | `string` | – | Background image URL |
-| `breakPoint` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| 'xxl' \| 'all'` | – | Built-in responsive breakpoint |
-| `customBreakPoint` | `string` | – | Custom max-width breakpoint (overrides `breakPoint`) |
+| `breakPoint` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| 'xxl' \| 'all' \| string` | – | Built-in responsive breakpoint, or a custom CSS value (e.g. `'450px'`) |
 | `transitionDuration` | `number` | `300` | Collapse / toggle transition duration in ms |
 | `rtl` | `boolean` | `false` | Right-to-left direction |
 | `rootStyles` | `CSSObject` | – | Styles applied to the sidebar root |

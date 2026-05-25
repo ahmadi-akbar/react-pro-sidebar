@@ -192,7 +192,7 @@ export const CustomBreakPoint: StoryFn<typeof Sidebar> = () => {
 
   return (
     <div style={{ display: 'flex', height: '100%', minHeight: '400px' }}>
-      <Sidebar toggled={toggled} customBreakPoint="800px" onBreakPoint={setBroken}>
+      <Sidebar toggled={toggled} breakPoint="800px" onBreakPoint={setBroken}>
         <Menu>
           <MenuItem> Documentation</MenuItem>
           <MenuItem> Calendar</MenuItem>
@@ -212,7 +212,7 @@ export const CustomBreakPoint: StoryFn<typeof Sidebar> = () => {
     </div>
   );
 };
-CustomBreakPoint.storyName = 'customBreakPoint';
+CustomBreakPoint.storyName = 'custom breakpoint value';
 
 BreakPoint.parameters = {
   docs: {

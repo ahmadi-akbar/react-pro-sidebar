@@ -216,14 +216,8 @@ type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | 
         </tr>
         <tr>
             <td>breakPoint</td>
-            <td><code>xs</code> | <code>sm</code> | <code>md</code> | <code>lg</code> | <code>xl</code> | <code>xxl</code> | <code>all</code></td>
-            <td>Set when the sidebar should trigger responsiveness behavior </td>
-            <td>-</td>
-        </tr>
-        <tr>
-            <td>customBreakPoint</td>
-            <td><code>string</code></td>
-            <td>Set custom breakpoint value, this will override breakPoint prop </td>
+            <td><code>xs</code> | <code>sm</code> | <code>md</code> | <code>lg</code> | <code>xl</code> | <code>xxl</code> | <code>all</code> | <code>string</code></td>
+            <td>Set when the sidebar should trigger responsiveness behavior. Accepts a predefined breakpoint or a custom CSS value (ex: <code>450px</code>)</td>
             <td>-</td>
         </tr>
         <tr>

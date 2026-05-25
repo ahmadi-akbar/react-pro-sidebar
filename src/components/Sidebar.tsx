@@ -5,16 +5,22 @@ import { useMediaQuery } from '../hooks/useMediaQuery';
 import { sidebarClasses } from '../utils/utilityClasses';
 import { StyledBackdrop } from '../styles/StyledBackdrop';
 
-type BreakPoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'all';
+type PredefinedBreakPoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'all';
 
-const BREAK_POINTS = {
+/**
+ * Accepts a predefined breakpoint (with editor autocomplete) or any custom CSS
+ * length such as `'450px'`. The `string & {}` keeps the literal suggestions
+ * while still allowing arbitrary strings.
+ */
+type BreakPoint = PredefinedBreakPoint | (string & {});
+
+const BREAK_POINTS: Record<Exclude<PredefinedBreakPoint, 'all'>, string> = {
   xs: '480px',
   sm: '576px',
   md: '768px',
   lg: '992px',
   xl: '1200px',
   xxl: '1600px',
-  all: 'all',
 };
 
 export interface SidebarProps extends React.HTMLAttributes<HTMLHtmlElement> {
@@ -36,16 +42,12 @@ export interface SidebarProps extends React.HTMLAttributes<HTMLHtmlElement> {
   collapsedWidth?: string;
 
   /**
-   * set when the sidebar should trigger responsiveness behavior
-   * @type `xs | sm | md | lg | xl | xxl | all | undefined`
+   * set when the sidebar should trigger responsiveness behavior.
+   * accepts a predefined breakpoint (`xs | sm | md | lg | xl | xxl | all`) or a
+   * custom CSS value such as `'450px'`
+   * @type `xs | sm | md | lg | xl | xxl | all | (string & {}) | undefined`
    */
   breakPoint?: BreakPoint;
-
-  /**
-   * alternative breakpoint value that will be used to trigger responsiveness
-   *
-   */
-  customBreakPoint?: string;
 
   /**
    * sidebar background color
@@ -205,7 +207,6 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
       className,
       children,
       breakPoint,
-      customBreakPoint,
       backgroundColor = 'rgb(249, 249, 249, 0.7)',
       transitionDuration = 300,
       image,
@@ -216,21 +217,18 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
     ref,
   ) => {
     const getBreakpointValue = () => {
-      if (customBreakPoint) {
-        return `(max-width: ${customBreakPoint})`;
+      if (!breakPoint) return undefined;
+
+      if (breakPoint === 'all') {
+        return `screen`;
       }
 
-      if (breakPoint) {
-        if (['xs', 'sm', 'md', 'lg', 'xl', 'xxl'].includes(breakPoint)) {
-          return `(max-width: ${BREAK_POINTS[breakPoint]})`;
-        }
-
-        if (breakPoint === 'all') {
-          return `screen`;
-        }
-
-        return `(max-width: ${breakPoint})`;
+      // predefined breakpoint -> its px value; otherwise treat as a custom value
+      if (breakPoint in BREAK_POINTS) {
+        return `(max-width: ${BREAK_POINTS[breakPoint as Exclude<PredefinedBreakPoint, 'all'>]})`;
       }
+
+      return `(max-width: ${breakPoint})`;
     };
 
     const breakpointCallbackFnRef = React.useRef<(broken: boolean) => void>();
