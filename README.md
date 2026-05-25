@@ -22,6 +22,7 @@ Full documentation, guides and live examples are available at **[react-pro-sideb
 
 ## Old versions
 
+- [v1.x](https://github.com/azouaoui-med/react-pro-sidebar/tree/v1.x)
 - [v0.x](https://github.com/azouaoui-med/react-pro-sidebar/tree/v0.x)
 
 ## Live Preview

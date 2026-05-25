@@ -1,21 +1,26 @@
 name: Release
 
+# Publishing is triggered by pushing a version tag, e.g.
+#   git tag v2.0.0-alpha.0 && git push origin v2.0.0-alpha.0
+# Prerelease tags (v*-alpha.N / v*-beta.N / v*-rc.N) publish under a matching
+# npm dist-tag so they never replace `latest`.
 on:
   push:
-    branches:
-      - master
+    tags:
+      - 'v*'
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+permissions:
+  contents: read
+
 jobs:
   release:
-    name: Release
+    name: Publish to npm
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -24,14 +29,35 @@ jobs:
 
       - run: yarn install --frozen-lockfile
 
-      # Either opens/updates a "Version Packages" PR (when changesets are
-      # pending) or, once that PR is merged, publishes to npm.
-      - name: Create release PR or publish
-        uses: changesets/action@v1
-        with:
-          version: yarn version-packages
-          publish: yarn release
+      # Quality gates — fail the publish if any of these break.
+      - run: yarn typecheck
+      - run: yarn test
+      - run: yarn build
+
+      - name: Verify tag matches package.json version
+        run: |
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME ($TAG_VERSION) does not match package.json version ($PKG_VERSION)"
+            exit 1
+          fi
+
+      - name: Resolve npm dist-tag
+        id: disttag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [[ "$VERSION" == *-* ]]; then
+            # Prerelease: e.g. 2.0.0-alpha.0 -> alpha
+            PRETAG="${VERSION#*-}"
+            PRETAG="${PRETAG%%.*}"
+            echo "value=$PRETAG" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=latest" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Publishing with dist-tag: $(tail -n1 "$GITHUB_OUTPUT")"
+
+      - name: Publish
+        run: npm publish --access public --tag "${{ steps.disttag.outputs.value }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
