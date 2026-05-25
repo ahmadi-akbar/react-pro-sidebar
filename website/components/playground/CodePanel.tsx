@@ -1,10 +1,13 @@
 import React from 'react';
-import { highlightJsx } from './highlight';
+import { tokenize, type Token } from './highlight';
 
 /**
  * A code-editor styled panel that displays a syntax-highlighted JSX snippet
  * with a copy button. Forces LTR direction so the code stays correctly
  * oriented even when the surrounding playground is in RTL mode.
+ *
+ * Syntax highlighting renders each token as a real React `<span>` — React
+ * escapes text content for us, so no `dangerouslySetInnerHTML` is needed.
  */
 export const CodePanel = ({
   code,
@@ -18,7 +21,7 @@ export const CodePanel = ({
   copiedLabel?: string;
 }) => {
   const [copied, setCopied] = React.useState(false);
-  const highlighted = React.useMemo(() => highlightJsx(code), [code]);
+  const tokens = React.useMemo(() => tokenize(code), [code]);
 
   const handleCopy = async () => {
     try {
@@ -163,9 +166,20 @@ export const CodePanel = ({
           textAlign: 'left',
         }}
       >
-        <code dangerouslySetInnerHTML={{ __html: highlighted }} />
+        <code>{tokens.map(renderToken)}</code>
       </pre>
     </div>
+  );
+};
+
+/** Render a single token. Plain text tokens render as raw text so React's
+ *  reconciler keeps them as text nodes (no extra `<span>` wrappers). */
+const renderToken = (token: Token, i: number): React.ReactNode => {
+  if (token.type === 'text') return token.text;
+  return (
+    <span key={i} className={`t-${token.type}`}>
+      {token.text}
+    </span>
   );
 };
 

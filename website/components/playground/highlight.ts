@@ -1,10 +1,23 @@
 /**
- * Tiny single-pass JSX tokenizer that returns HTML-with-spans for syntax
- * highlighting. Tuned for the snippets emitted by `generateCode` — handles
- * strings, comments, keywords, JSX tags, JSX attributes, numbers, and
- * booleans. Good enough for a playground preview without adding a 100kb
- * highlighter dependency.
+ * Tiny single-pass JSX tokenizer. Returns an array of tokens that the caller
+ * renders as React nodes. No HTML strings, no `dangerouslySetInnerHTML` — React
+ * escapes the text content of each `<span>` automatically.
  */
+
+export type TokenType =
+  | 'kw' // keyword
+  | 'str' // string literal
+  | 'tag' // JSX tag name
+  | 'attr' // JSX attribute name
+  | 'com' // comment
+  | 'num' // number
+  | 'bool' // true / false / null / undefined
+  | 'text'; // anything else (default text)
+
+export interface Token {
+  type: TokenType;
+  text: string;
+}
 
 const KEYWORDS = new Set([
   'import',
@@ -30,13 +43,19 @@ const KEYWORDS = new Set([
 
 const BOOLEANS = new Set(['true', 'false', 'null', 'undefined']);
 
-const escapeHtml = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+/** Pushes a token, merging consecutive `text` tokens to keep the array short. */
+const push = (out: Token[], type: TokenType, text: string) => {
+  if (!text) return;
+  const last = out[out.length - 1];
+  if (last && last.type === 'text' && type === 'text') {
+    last.text += text;
+  } else {
+    out.push({ type, text });
+  }
+};
 
-const wrap = (cls: string, text: string) => `<span class="${cls}">${escapeHtml(text)}</span>`;
-
-export function highlightJsx(code: string): string {
-  const out: string[] = [];
+export function tokenize(code: string): Token[] {
+  const out: Token[] = [];
   const n = code.length;
   let i = 0;
   let inJsxTag = false;
@@ -48,7 +67,7 @@ export function highlightJsx(code: string): string {
     if (ch === '/' && code[i + 1] === '/') {
       let j = i;
       while (j < n && code[j] !== '\n') j++;
-      out.push(wrap('t-com', code.slice(i, j)));
+      push(out, 'com', code.slice(i, j));
       i = j;
       continue;
     }
@@ -58,12 +77,12 @@ export function highlightJsx(code: string): string {
       let j = i + 2;
       while (j < n - 1 && !(code[j] === '*' && code[j + 1] === '/')) j++;
       j = Math.min(j + 2, n);
-      out.push(wrap('t-com', code.slice(i, j)));
+      push(out, 'com', code.slice(i, j));
       i = j;
       continue;
     }
 
-    // String literal (single or double quote, with escapes)
+    // String literal (single or double quoted, with escapes)
     if (ch === "'" || ch === '"') {
       const quote = ch;
       let j = i + 1;
@@ -72,60 +91,61 @@ export function highlightJsx(code: string): string {
         j++;
       }
       j = Math.min(j + 1, n);
-      out.push(wrap('t-str', code.slice(i, j)));
+      push(out, 'str', code.slice(i, j));
       i = j;
       continue;
     }
 
-    // JSX opening or closing tag: <Tag, </Tag, or punctuation `<`
+    // JSX opening / closing tag: <Tag, </Tag
     if (ch === '<') {
       const next = code[i + 1] || '';
       if (/[A-Za-z]/.test(next) || next === '/') {
-        out.push(escapeHtml('<'));
+        push(out, 'text', '<');
         i++;
         if (code[i] === '/') {
-          out.push('/');
+          push(out, 'text', '/');
           i++;
         }
         let j = i;
         while (j < n && /[A-Za-z0-9_.]/.test(code[j])) j++;
         const name = code.slice(i, j);
-        if (name) out.push(wrap('t-tag', name));
+        if (name) push(out, 'tag', name);
         i = j;
         inJsxTag = true;
         continue;
       }
     }
 
-    // JSX self-close `/>` or close `>`
-    if (inJsxTag && ch === '>') {
-      out.push(escapeHtml('>'));
-      i++;
-      inJsxTag = false;
-      continue;
-    }
+    // JSX `/>` self-close
     if (inJsxTag && ch === '/' && code[i + 1] === '>') {
-      out.push(escapeHtml('/>'));
+      push(out, 'text', '/>');
       i += 2;
       inJsxTag = false;
       continue;
     }
 
-    // Identifier / word
+    // JSX `>` close
+    if (inJsxTag && ch === '>') {
+      push(out, 'text', '>');
+      i++;
+      inJsxTag = false;
+      continue;
+    }
+
+    // Identifier / keyword / boolean / JSX attribute
     if (/[A-Za-z_$]/.test(ch)) {
       let j = i;
       while (j < n && /[A-Za-z0-9_$]/.test(code[j])) j++;
       const word = code.slice(i, j);
 
       if (KEYWORDS.has(word)) {
-        out.push(wrap('t-kw', word));
+        push(out, 'kw', word);
       } else if (BOOLEANS.has(word)) {
-        out.push(wrap('t-bool', word));
+        push(out, 'bool', word);
       } else if (inJsxTag) {
-        // JSX attribute (or boolean attribute right before `>` / whitespace)
-        out.push(wrap('t-attr', word));
+        push(out, 'attr', word);
       } else {
-        out.push(escapeHtml(word));
+        push(out, 'text', word);
       }
       i = j;
       continue;
@@ -135,14 +155,15 @@ export function highlightJsx(code: string): string {
     if (/[0-9]/.test(ch)) {
       let j = i;
       while (j < n && /[0-9.]/.test(code[j])) j++;
-      out.push(wrap('t-num', code.slice(i, j)));
+      push(out, 'num', code.slice(i, j));
       i = j;
       continue;
     }
 
-    out.push(escapeHtml(ch));
+    // Whitespace / punctuation / everything else
+    push(out, 'text', ch);
     i++;
   }
 
-  return out.join('');
+  return out;
 }

@@ -91,6 +91,11 @@ const config: DocsThemeConfig = {
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       <link rel="alternate icon" href="/favicon.ico" />
       <meta name="theme-color" content="#0098e5" />
+      {/* Google Analytics 4 (gtag.js). Only the external loader lives in the
+          document head; the initialization (`gtag('config', …)`) is fired
+          from `pages/_app.tsx` inside a useEffect, so we never need
+          `dangerouslySetInnerHTML` for an inline script body. */}
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-DSFH2NT388" />
     </>
   ),
   sidebar: {

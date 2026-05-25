@@ -10,7 +10,16 @@ import globals from 'globals';
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'storybook-static/**', 'node_modules/**', 'coverage/**'],
+    ignores: [
+      'dist/**',
+      'storybook-static/**',
+      'node_modules/**',
+      'coverage/**',
+      // Next.js build artifacts inside the docs site
+      'website/.next/**',
+      'website/out/**',
+      'website/next-env.d.ts',
+    ],
   },
 
   js.configs.recommended,
@@ -49,6 +58,20 @@ export default tseslint.config(
       'react/prop-types': 'off',
       '@typescript-eslint/no-empty-interface': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
+    },
+  },
+
+  // Node-style config files (CommonJS). Next.js still ships `next.config.js`
+  // as CJS by default — give those files the right globals and let them
+  // `require()`.
+  {
+    files: ['**/*.config.{js,cjs}', '**/.*rc.{js,cjs}'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: { ...globals.node },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
 
