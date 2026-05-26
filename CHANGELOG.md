@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0-alpha.1
+
+### Major Changes
+
+- ca60c78: v2 SSR/Next.js fixes: breakpoint no longer flashes the sidebar open before hydration (applied via a CSS media query); popper flyouts are portaled out of the scroll container so `overflow`/`backdrop-filter` can't clip or mis-position them, while keeping color/font/direction; RTL and the React 19 `inert` warning fixed; `onBreakPoint` fires only on change.
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
