@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import styled, { CSSObject } from '@emotion/styled';
 import classnames from 'classnames';
 import { SubMenuContent } from './SubMenuContent';
@@ -7,7 +8,7 @@ import { StyledMenuIcon } from '../styles/StyledMenuIcon';
 import { StyledMenuPrefix } from '../styles/StyledMenuPrefix';
 import { useMenu } from '../hooks/useMenu';
 import { StyledMenuSuffix } from '../styles/StyledMenuSuffix';
-import { menuClasses } from '../utils/utilityClasses';
+import { menuClasses, sidebarClasses } from '../utils/utilityClasses';
 import {
   StyledExpandIcon,
   StyledExpandIconCollapsed,
@@ -176,11 +177,25 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
   const [internalOpen, setInternalOpen] = React.useState(!!defaultOpen);
   const [openWhenCollapsed, setOpenWhenCollapsed] = React.useState(false);
 
+  // Popper content is portaled out of the scroll container (see render), but
+  // only after mount so the server and first client render stay inline and
+  // hydration matches. We portal to the sidebar root rather than <body>: it's
+  // outside the container's `overflow` / `backdrop-filter` (the things that
+  // clip or trap a fixed flyout) yet still a sidebar descendant, so the flyout
+  // keeps inheriting the sidebar's color and font. Falls back to <body> when
+  // there's no sidebar ancestor.
+  const [portalNode, setPortalNode] = React.useState<HTMLElement | null>(null);
+  React.useEffect(() => {
+    const root = buttonRef.current?.closest(`.${sidebarClasses.root}`);
+    setPortalNode((root as HTMLElement | null) ?? document.body);
+  }, []);
+
   const buttonRef = React.useRef<HTMLAnchorElement>(null);
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   const { popperInstance } = usePopper({
     popper: isPopper,
+    mounted: !!portalNode,
     buttonRef,
     contentRef,
   });
@@ -295,11 +310,12 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
   const getSubMenuItemStyles = (element: MenuItemElement): CSSObject | undefined =>
     resolveElementStyles(menuItemStyles, element, styleParams);
 
-  // Reposition the popper after the sidebar's collapse/rtl transition.
+  // Reposition the popper after the sidebar's collapse/rtl transition, and once
+  // the content has been portaled to <body> on mount.
   React.useEffect(() => {
     const timer = setTimeout(() => popperInstance?.update(), sidebarTransitionDuration);
     return () => clearTimeout(timer);
-  }, [collapsed, level, rtl, sidebarTransitionDuration, popperInstance]);
+  }, [collapsed, level, rtl, sidebarTransitionDuration, popperInstance, portalNode]);
 
   // Reset the popper to closed when the popper mode toggles (entering collapsed
   // or popover mode) — not when the popper instance first becomes available.
@@ -359,6 +375,33 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
     [menuClasses.disabled]: disabled,
     [menuClasses.open]: open,
   };
+
+  const submenuInner = (
+    <SubMenuContent
+      ref={contentRef}
+      openWhenCollapsed={openWhenCollapsed}
+      open={open}
+      popper={isPopper}
+      rtl={rtl}
+      className={classnames(menuClasses.subMenuContent, sharedClasses)}
+      rootStyles={getSubMenuItemStyles('subMenuContent')}
+    >
+      <LevelContext.Provider value={level + 1}>
+        <AccordionContext.Provider value={childAccordionContext}>
+          <SubMenuActiveContext.Provider value={activeContextValue}>
+            {children}
+          </SubMenuActiveContext.Provider>
+        </AccordionContext.Provider>
+      </LevelContext.Provider>
+    </SubMenuContent>
+  );
+
+  // In popper mode, portal the content to the sidebar root so the scroll
+  // container's `overflow` / `backdrop-filter` can't clip or mis-position the
+  // fixed flyout — while still inheriting the sidebar's color/font. Portaled
+  // only after mount so SSR and the first client render stay inline.
+  const subMenuContent =
+    isPopper && portalNode ? createPortal(submenuInner, portalNode) : submenuInner;
 
   return (
     <StyledSubMenu
@@ -457,22 +500,7 @@ export const SubMenuFR: React.ForwardRefRenderFunction<HTMLLIElement, SubMenuPro
         </StyledExpandIconWrapper>
       </MenuButton>
 
-      <SubMenuContent
-        ref={contentRef}
-        openWhenCollapsed={openWhenCollapsed}
-        open={open}
-        popper={isPopper}
-        className={classnames(menuClasses.subMenuContent, sharedClasses)}
-        rootStyles={getSubMenuItemStyles('subMenuContent')}
-      >
-        <LevelContext.Provider value={level + 1}>
-          <AccordionContext.Provider value={childAccordionContext}>
-            <SubMenuActiveContext.Provider value={activeContextValue}>
-              {children}
-            </SubMenuActiveContext.Provider>
-          </AccordionContext.Provider>
-        </LevelContext.Provider>
-      </SubMenuContent>
+      {subMenuContent}
     </StyledSubMenu>
   );
 };
