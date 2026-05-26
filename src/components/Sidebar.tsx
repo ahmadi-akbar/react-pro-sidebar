@@ -98,9 +98,34 @@ interface StyledSidebarProps extends Omit<SidebarProps, 'backgroundColor'> {
   toggled?: boolean;
   broken?: boolean;
   rtl?: boolean;
+  /** Media query (e.g. `(max-width: 768px)` / `screen`) at which to hide via CSS. */
+  breakpointMediaQuery?: string;
 }
 
 type StyledSidebarContainerProps = Pick<SidebarProps, 'backgroundColor'>;
+
+// Off-canvas (broken/overlay) layout: fixed and slid off-screen, brought back
+// when toggled. Shared by the CSS media query and the runtime `broken` class so
+// the two never drift.
+const brokenLayout = ({
+  rtl,
+  width,
+  collapsedWidth,
+}: Pick<StyledSidebarProps, 'rtl' | 'width' | 'collapsedWidth'>) => `
+  position: fixed;
+  height: 100%;
+  top: 0px;
+  z-index: 100;
+  ${rtl ? `right: -${width};` : `left: -${width};`}
+
+  &.${sidebarClasses.collapsed} {
+    ${rtl ? `right: -${collapsedWidth};` : `left: -${collapsedWidth};`}
+  }
+
+  &.${sidebarClasses.toggled} {
+    ${rtl ? `right: 0;` : `left: 0;`}
+  }
+`;
 
 const StyledSidebar = styled.aside<StyledSidebarProps>`
   position: relative;
@@ -126,33 +151,19 @@ const StyledSidebar = styled.aside<StyledSidebarProps>`
     border-left-style: solid;
   }
 
+  /*
+   * Hide below the breakpoint with a real CSS media query so the correct
+   * (hidden) layout is painted on the very first load — before JS runs and
+   * hydrates. Without this, SSR (e.g. Next.js) renders the sidebar visible
+   * (the server can't know the viewport), causing a flash before the runtime
+   * \`broken\` state hides it.
+   */
+  ${({ breakpointMediaQuery, ...props }) =>
+    breakpointMediaQuery ? `@media ${breakpointMediaQuery} { ${brokenLayout(props)} }` : ''}
+
+  /* Runtime broken state (covers resize after mount; also a styling hook). */
   &.${sidebarClasses.broken} {
-    position: fixed;
-    height: 100%;
-    top: 0px;
-    z-index: 100;
-
-    ${({ rtl, width }) => (!rtl ? `left: -${width};` : '')}
-
-    &.${sidebarClasses.collapsed} {
-      ${({ rtl, collapsedWidth }) => (!rtl ? `left: -${collapsedWidth}; ` : '')}
-    }
-
-    &.${sidebarClasses.toggled} {
-      ${({ rtl }) => (!rtl ? `left: 0;` : '')}
-    }
-
-    &.${sidebarClasses.rtl} {
-      right: -${({ width }) => width};
-
-      &.${sidebarClasses.collapsed} {
-        right: -${({ collapsedWidth }) => collapsedWidth};
-      }
-
-      &.${sidebarClasses.toggled} {
-        right: 0;
-      }
-    }
+    ${(props) => brokenLayout(props)}
   }
 
   ${({ rootStyles }) => rootStyles}
@@ -237,7 +248,8 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
       onBreakPoint?.(broken);
     };
 
-    const broken = useMediaQuery(getBreakpointValue());
+    const breakpointMediaQuery = getBreakpointValue();
+    const broken = useMediaQuery(breakpointMediaQuery);
 
     const collapsedValue = collapsed;
     const toggledValue = toggled;
@@ -274,8 +286,17 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
       [collapsedValue, toggledValue, rtl, transitionDuration],
     );
 
+    // Notify `onBreakPoint` only when the broken state actually changes.
+    // `broken` starts `false` (deterministic for SSR) and settles via a layout
+    // effect, so a viewport that already matches would otherwise emit a
+    // spurious `false` before the settled `true`. The `false` baseline means
+    // the default (non-broken) state is never re-announced on mount.
+    const prevBrokenRef = React.useRef(false);
     React.useEffect(() => {
-      breakpointCallbackFnRef.current?.(broken);
+      if (broken !== prevBrokenRef.current) {
+        prevBrokenRef.current = broken;
+        breakpointCallbackFnRef.current?.(broken);
+      }
     }, [broken]);
 
     // When the sidebar opens as an overlay (broken + toggled), move focus to it
@@ -311,6 +332,7 @@ export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
           width={width}
           collapsedWidth={collapsedWidth}
           transitionDuration={transitionDuration}
+          breakpointMediaQuery={breakpointMediaQuery}
           className={classnames(
             sidebarClasses.root,
             {
