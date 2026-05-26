@@ -214,4 +214,30 @@ describe('Sidebar', () => {
       expect(onBackdropClick).not.toHaveBeenCalled();
     });
   });
+
+  describe('onBreakPoint', () => {
+    it('does not announce the default (non-broken) state on mount', () => {
+      const onBreakPoint = vi.fn();
+      vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => false);
+      customRender(
+        <Sidebar breakPoint="md" onBreakPoint={onBreakPoint}>
+          Sidebar
+        </Sidebar>,
+      );
+      // `broken` starts false and stays false — no spurious callback.
+      expect(onBreakPoint).not.toHaveBeenCalled();
+    });
+
+    it('announces the broken state once when it becomes broken', () => {
+      const onBreakPoint = vi.fn();
+      vi.spyOn(mediaQueryHook, 'useMediaQuery').mockImplementation(() => true);
+      customRender(
+        <Sidebar breakPoint="md" onBreakPoint={onBreakPoint}>
+          Sidebar
+        </Sidebar>,
+      );
+      expect(onBreakPoint).toHaveBeenCalledTimes(1);
+      expect(onBreakPoint).toHaveBeenCalledWith(true);
+    });
+  });
 });

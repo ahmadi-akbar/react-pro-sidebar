@@ -10,6 +10,11 @@ interface SubMenuContentProps extends React.HTMLAttributes<HTMLDivElement> {
   openWhenCollapsed?: boolean;
   /** Render as a floating popper (collapsed top-level submenu, or popover mode). */
   popper?: boolean;
+  /**
+   * RTL direction. Needed because popper content is portaled to `<body>` and no
+   * longer inherits `direction: rtl` from the sidebar ancestor.
+   */
+  rtl?: boolean;
   rootStyles?: CSSObject;
   children?: React.ReactNode;
 }
@@ -64,7 +69,7 @@ const StyledSubMenuContent = styled.div<SubMenuContentProps>`
 `;
 
 const SubMenuContentFR: React.ForwardRefRenderFunction<HTMLDivElement, SubMenuContentProps> = (
-  { children, open, openWhenCollapsed, popper, ...rest },
+  { children, open, openWhenCollapsed, popper, rtl, ...rest },
   ref,
 ) => {
   const { transitionDuration } = useMenu();
@@ -73,15 +78,18 @@ const SubMenuContentFR: React.ForwardRefRenderFunction<HTMLDivElement, SubMenuCo
   // submenu slides open based on `open`. While hidden, mark the subtree `inert`
   // so its links stay out of the tab order and the accessibility tree.
   const isVisible = popper ? !!openWhenCollapsed : !!open;
-  // `inert` is a real boolean prop in React 19 (an empty string is falsy and
-  // gets dropped), but untyped in React 18 — pass boolean `true` and apply it
-  // untyped so it renders a present attribute on both.
-  const inertProps = (isVisible ? {} : { inert: 'true' }) as object;
+  // `inert` is a real boolean attribute in React 19 — passing the string
+  // "true" there logs a warning — but React 18 doesn't recognize `inert` and
+  // only renders its string form (it drops a boolean `true`). Pick the
+  // representation the running React version renders as a present attribute.
+  const inertValue: true | 'true' = parseInt(React.version, 10) >= 19 ? true : 'true';
+  const inertProps = (isVisible ? {} : { inert: inertValue }) as object;
 
   return (
     <StyledSubMenuContent
       data-testid={`${menuClasses.subMenuContent}-test-id`}
       ref={ref}
+      dir={rtl ? 'rtl' : undefined}
       popper={popper}
       open={open}
       openWhenCollapsed={openWhenCollapsed}

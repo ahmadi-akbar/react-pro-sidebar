@@ -124,13 +124,19 @@ describe('usePopper', () => {
 
   it('does not create a popper when popper is false', () => {
     const { buttonRef, contentRef } = makeRefs();
-    renderHook(() => usePopper({ popper: false, buttonRef, contentRef }));
+    renderHook(() => usePopper({ popper: false, mounted: true, buttonRef, contentRef }));
+    expect(createPopper).not.toHaveBeenCalled();
+  });
+
+  it('does not create a popper until mounted (content portaled)', () => {
+    const { buttonRef, contentRef } = makeRefs();
+    renderHook(() => usePopper({ popper: true, mounted: false, buttonRef, contentRef }));
     expect(createPopper).not.toHaveBeenCalled();
   });
 
   it('creates a popper when popper is true', () => {
     const { buttonRef, contentRef } = makeRefs();
-    renderHook(() => usePopper({ popper: true, buttonRef, contentRef }));
+    renderHook(() => usePopper({ popper: true, mounted: true, buttonRef, contentRef }));
     expect(createPopper).toHaveBeenCalledWith(
       buttonRef.current,
       contentRef.current,
@@ -152,7 +158,9 @@ describe('usePopper', () => {
     global.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
 
     const { buttonRef, contentRef } = makeRefs();
-    const { unmount } = renderHook(() => usePopper({ popper: true, buttonRef, contentRef }));
+    const { unmount } = renderHook(() =>
+      usePopper({ popper: true, mounted: true, buttonRef, contentRef }),
+    );
 
     expect(observe).toHaveBeenCalled();
     expect(disconnect).not.toHaveBeenCalled();
