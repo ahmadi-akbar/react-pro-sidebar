@@ -4,5 +4,5 @@
   "initialVersions": {
     "react-pro-sidebar": "2.0.0-alpha.0"
   },
-  "changesets": []
+  "changesets": ["ssr-next-fixes"]
 }
