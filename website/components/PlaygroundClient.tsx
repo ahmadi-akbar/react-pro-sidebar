@@ -28,6 +28,13 @@ import {
 } from './playground/icons';
 import { CodePanel } from './playground/CodePanel';
 import { generateCode } from './playground/generateCode';
+import { AdSenseAd } from './AdSenseAd';
+
+/**
+ * AdSense slot ID for the playground in-content ad unit.
+ * Created in AdSense dashboard as `rps-playground` (Display ad, responsive).
+ */
+const PLAYGROUND_AD_SLOT = '5929595045';
 
 type Theme = 'light' | 'dark';
 type BreakPoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'all' | 'none';
@@ -579,6 +586,13 @@ export default function PlaygroundClient() {
                 options={breakPointOptions}
               />
             </ControlGroup>
+          </div>
+
+          {/* AdSense in-content slot — sits between the controls and the
+              generated-code preview so it's visible without competing with
+              the primary actions. */}
+          <div style={{ marginTop: 24, minHeight: 90 }}>
+            <AdSenseAd slot={PLAYGROUND_AD_SLOT} />
           </div>
 
           {/* Generated-code preview with copy-to-clipboard */}
