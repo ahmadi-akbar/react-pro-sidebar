@@ -74,12 +74,16 @@ const config: DocsThemeConfig = {
   docsRepositoryBase: 'https://github.com/azouaoui-med/react-pro-sidebar/tree/main/website',
   footer: {
     content: (
-      <span>
-        MIT 2026 ©{' '}
-        <a href="https://azouaoui.netlify.app" target="_blank" rel="noopener noreferrer">
-          Mohamed Azouaoui
-        </a>
-        .
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <span>
+          MIT 2026 ©{' '}
+          <a href="https://azouaoui.netlify.app" target="_blank" rel="noopener noreferrer">
+            Mohamed Azouaoui
+          </a>
+          .
+        </span>
+        <span style={{ opacity: 0.4 }}>·</span>
+        <a href="/privacy">Privacy</a>
       </span>
     ),
   },
@@ -96,6 +100,23 @@ const config: DocsThemeConfig = {
           from `pages/_app.tsx` inside a useEffect, so we never need
           `dangerouslySetInnerHTML` for an inline script body. */}
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-DSFH2NT388" />
+
+      {/* Google AdSense — site-wide loader + ownership-verification meta.
+          Individual <ins.adsbygoogle> ad slots live in the components that
+          want ads (currently only the playground). */}
+      <meta name="google-adsense-account" content="ca-pub-5391363924015725" />
+      <script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5391363924015725"
+        crossOrigin="anonymous"
+      />
+
+      {/* Google Funding Choices — Consent Management Platform for GDPR / UK
+          GDPR users. The actual consent banner UI is configured in the AdSense
+          dashboard (Privacy & messaging → European regulations); this loader
+          just primes the runtime. Safe to leave in place even before the
+          message is published. */}
+      <script async src="https://fundingchoicesmessages.google.com/i/pub-5391363924015725?ers=1" />
     </>
   ),
   sidebar: {
